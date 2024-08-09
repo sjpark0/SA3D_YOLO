@@ -6,17 +6,13 @@ SA3D 코드를 개선하여 인식률을 높이기 위한 코드를 개발하고
 
 # Installation
 The installation of SA3D is similar to [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting).
+
 ```bash
-git clone git@github.com:Jumpat/SegmentAnythingin3D.git
-```
-or
-```bash
-git clone https://github.com/Jumpat/SegmentAnythingin3D.git
+git clone https://github.com/franzkafka779/SA3D_YOLO.git
 ```
 
 ```bash
-cd SegmentAnythingin3D;
-git checkout sa3d-gs
+cd SA3D_YOLO;
 ```
 
 Then install the dependencies:
