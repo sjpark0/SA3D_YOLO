@@ -46,7 +46,7 @@ https://drive.google.com/drive/folders/1WeVuaVRklUjtP9QMRl5RY5P26Rf9Lx22?usp=dri
 
 data 파일은 압축을 해제하여 SA3D_YOLO에 세팅 \
 YOLO pt파일은 다운받아 SA3D_YOLO에 위치 \
-Labeling 파일은 SA3D_YOLO보다 한 단계 상위에 위치하게 함 \
+Labeling 파일은 SA3D_YOLO보다 한 단계 상위에 위치하게 함 
 
 ## Usage
 - Train NeRF
