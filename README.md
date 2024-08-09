@@ -5,7 +5,6 @@ SA3D 코드를 개선하여 인식률을 높이기 위한 코드를 개발하고
 <br>
 
 # Installation
-The installation of SA3D is similar to [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting).
 
 ```bash
 git clone https://github.com/franzkafka779/SA3D_YOLO.git
@@ -17,87 +16,47 @@ cd SA3D_YOLO;
 
 Then install the dependencies:
 ```bash
-conda env create --file environment.yml
-conda activate gaussian_splatting_sa3d
+conda create -n sa3d python=3.10
+conda activate sa3d_yolo
+pip install -r requirements.txt
 ```
 
 Install SAM:
 ```bash
-cd third_party;
-git clone git@github.com:facebookresearch/segment-anything.git 
+mkdir dependencies; cd dependencies
+git clone https://github.com/facebookresearch/segment-anything.git 
 cd segment-anything; pip install -e .
 mkdir sam_ckpt; cd sam_ckpt
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
 ```
 
+Installing Grounding-DINO
+```bash
+git clone https://github.com/IDEA-Research/GroundingDINO.git
+cd GroundingDINO/; pip install -e .
+mkdir weights; cd weights
+wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth
+```
+
 ## Prepare Data
 
-The used datasets are [360_v2](https://jonbarron.info/mipnerf360/), [nerf_llff_data](https://drive.google.com/drive/folders/14boI-o5hGO9srnWaaogTU5_ji7wkX2S7) and [LERF](https://drive.google.com/drive/folders/1vh0mSl7v29yaGsxleadcj-LCZOE_WEWB?usp=sharing).
+이곳에서 데이터, 라벨링 GT, YOLO pt 파일을 다운로드 받을 수 있습니다. 
+https://drive.google.com/drive/folders/1WeVuaVRklUjtP9QMRl5RY5P26Rf9Lx22?usp=drive_link
 
-The data structure of SA3D-GS is shown as follows:
-```
-./data
-    /360_v2
-        /garden
-            /images
-            /sparse
-            /features
-        ...
-    /nerf_llff_data
-        /fern
-            /images
-            /poses_bounds.npy
-            /sparse
-            /features
-        /horns
-            ...
-        ...
-    /lerf_data
-        ...
-```
+data 파일은 압축을 해제하여 SA3D_YOLO에 세팅
+YOLO pt파일은 다운받아 SA3D_YOLO에 위치
+Labeling 파일은 SA3D_YOLO보다 한 단계 상위에 위치하게 함
 
-## Pre-train the 3D Gaussians
-We inherit all attributes from 3DGS, more information about training the Gaussians can be found in their repo.
-```bash
-python train_scene.py -s <path to COLMAP or NeRF Synthetic dataset>
-```
-
-## 3D Segmentation
-Before the segmentation phase, you need to extract the SAM encoder features, run the following command:
-```bash
-python extract_features.py --image_root <path to the scene data> --sam_checkpoint_path <path to the pre-trained SAM model> --downsample <1/2/4/8>
-```
-
-Then run the segmentation:
-```bash
-python train_seg.py -m <path to the pre-trained 3D-GS model>
-```
-
-Please note that currently we haven't implement a GUI yet, you have to change the hardcoded prompt points in *train_seg.py*.
-
-## Rendering
-After the segmentation, you can render the segmentation results by running the following command:
-```bash
-python render.py -m <path to the pre-trained 3DGS model> --target scene --segment
-```
-
-You can also render the pre-trained 3DGS model without segmentation:
-```bash
-python render.py -m <path to the pre-trained 3DGS model> --target scene
-```
-
-# Acknowledgement
-The code is built based on [Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) and [Segment Anything](https://github.com/facebookresearch/segment-anything). We also borrow the implementation of 3D-GS depth rendering (i.e., submodule/diff-gaussian-rasterization-depth) from [here](https://github.com/ashawkey/diff-gaussian-rasterization). We thank them all for their great work.
-
-
-# Citation
-If you find this project helpful for your research, please consider citing our paper and giving a ⭐.
-
-```BibTex
-@inproceedings{cen2023segment,
-      title={Segment Anything in 3D with NeRFs}, 
-      author={Jiazhong Cen and Zanwei Zhou and Jiemin Fang and Chen Yang and Wei Shen and Lingxi Xie and Dongsheng Jiang and Xiaopeng Zhang and Qi Tian},
-      booktitle    = {NeurIPS},
-      year         = {2023},
-}
-```
+## Usage
+- Train NeRF
+  ```bash
+  python run.py --config=configs/nerf_unbounded/Set13.py --stop_at=20000 --render_video --i_weights=10000
+  ```
+- Run SA3D in GUI
+  ```bash
+  python run_seg_gui.py --config=configs/nerf_unbounded/seg_Set12.py --segment --sp_name=_gui --num_prompts=20 --render_opt=train --save_ckpt
+  ```
+- Render and Save Fly-through Videos
+  ```bash
+  python run_seg_gui.py --config=configs/nerf_unbounded/seg_Set1.py --segment --sp_name=_gui --num_prompts=20 --render_only --render_opt=video --dump_images --seg_type seg_img seg_density
+  ```
