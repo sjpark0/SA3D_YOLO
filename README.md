@@ -44,9 +44,9 @@ wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alp
 이곳에서 데이터, 라벨링 GT, YOLO pt 파일을 다운로드 받을 수 있습니다. 
 https://drive.google.com/drive/folders/1WeVuaVRklUjtP9QMRl5RY5P26Rf9Lx22?usp=drive_link
 
-data 파일은 압축을 해제하여 SA3D_YOLO에 세팅
-YOLO pt파일은 다운받아 SA3D_YOLO에 위치
-Labeling 파일은 SA3D_YOLO보다 한 단계 상위에 위치하게 함
+data 파일은 압축을 해제하여 SA3D_YOLO에 세팅 \
+YOLO pt파일은 다운받아 SA3D_YOLO에 위치 \
+Labeling 파일은 SA3D_YOLO보다 한 단계 상위에 위치하게 함 \
 
 ## Usage
 - Train NeRF
