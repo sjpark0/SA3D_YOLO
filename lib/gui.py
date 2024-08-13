@@ -264,6 +264,55 @@ class Sam3dGUI:
                     self.ctx['show_rgb'] = True
                     if is_finished:
                         break
+
+
+                # by seok: generate view sequence and train again
+                self.Seg3d.vsgflag==True
+
+                # by seok: sort view list according to the confidence value
+                confidences = self.Seg3d.confidences
+                i_train = self.Seg3d.data_dict['i_train']
+
+                view_dict = {confidences[i]:i_train[i] for i in range(len(i_train))}
+                view_dict = dict(sorted(view_dict.items(), reverse=True))
+
+                i_train_sorted = list(view_dict.values())
+
+                # i_train_sorted = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                # i_train_sorted = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+                self.Seg3d.data_dict['i_train'] = i_train_sorted
+
+
+                img = self.Seg3d.data_dict['images'][i_train_sorted[0],:,:,:].numpy()
+                img = utils.to8b(img)
+                h, w, c = img.shape
+                results = model_yolo.predict(source=img, imgsz=(h,w), classes=0)
+                h2, w2 = results[0].masks.data[0].shape
+                m = torch.zeros([h, w])
+                idx_select = self.Seg3d.idx_selected[i_train_sorted[0]]
+                img = results[0].masks.data[idx_select]
+                m = img[(h2-h)//2:(h2+h)//2,:]
+
+                save_image(m, 'yolo_0.png')
+
+                masks = torch.zeros([c, h, w]).cpu().numpy()
+                masks[0:3,:,:] = m.type(torch.bool).cpu().numpy()
+
+                self.train_idx = 0
+                # optim in the first view
+                self.Seg3d.train_step(self.train_idx, sam_mask=masks)
+                self.train_idx += 1
+                # cross-view training
+                while True:
+                    rgb, sam_prompt, is_finished = self.Seg3d.train_step(self.train_idx)
+                    self.train_idx += 1
+                    self.ctx['fig_seg_rgb'] = rgb
+                    self.ctx['fig_sam_mask'] = sam_prompt
+                    self.ctx['show_rgb'] = True
+                    if is_finished:
+                        break
+
+
                 self.Seg3d.save_ckpt()
 
                 gt_order = [0, 1, 2, 3, 4, 5]  # 수동으로 지정한 YOLO 마스크 순서
@@ -298,11 +347,11 @@ class Sam3dGUI:
                     imageio.imwrite(f"GT_sorted_{idx:02d}.png", m)
                     #////////////////////////////////////////////////////////////////////
 
-                        tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
-                        avg_IoU[j] += tmp_IoU
-                        print(f"IoU_{idx}_p{j+1} is: {tmp_IoU}")
-                        with open(f"IoU_p{j+1}.txt", "a") as f:
-                            f.write(f"{tmp_IoU}\n")
+                    tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
+                    avg_IoU[j] += tmp_IoU
+                    print(f"IoU_{idx}_p{j+1} is: {tmp_IoU}")
+                    with open(f"IoU_p{j+1}.txt", "a") as f:
+                        f.write(f"{tmp_IoU}\n")
 
                 for j in gt_order:
                     avg_IoU[j] /= len(render_poses)
