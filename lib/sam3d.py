@@ -63,6 +63,12 @@ class Sam3D(ABC):
         self.stage = stage
         self.coarse_ckpt_path = coarse_ckpt_path
 
+        # by seok optimal view sequence generation
+        self.vsgflag = False
+        self.confidences = []
+        self.idx_selected = []
+
+
 
     def init_model(self):
         '''TODO, add discription'''
@@ -191,6 +197,9 @@ class Sam3D(ABC):
         assert(idx < len(render_poses))
 
         rgb, depth, bgmap, seg_m, dual_seg_m = self.render_view(idx, [render_poses, HW, Ks])
+
+        idx_tmp = idx
+                
         if sam_mask is None:
             # self.predictor.set_image(utils.to8b(rgb.cpu().numpy()))
             # sam_seg_show = self.prompt_and_inverse(idx, HW, seg_m, dual_seg_m, depth)
@@ -202,7 +211,6 @@ class Sam3D(ABC):
             self.predictor.set_image(img)
 
             #////////////////////////////////////////////////////////////////
-            # idx_tmp = idx
             # if idx_tmp+10 < 31:
             #     idx_tmp += 10
             # else:
@@ -210,8 +218,8 @@ class Sam3D(ABC):
             #////////////////////////////////////////////////////////////////
             # imageio.imwrite(f"img1_{idx}.png", img)
 
-            img = self.data_dict['images'][idx,:,:,:].numpy()
-            # # img = self.data_dict['images'][idx%32,:,:,:].numpy()
+            # img = self.data_dict['images'][idx,:,:,:].numpy()
+            img = self.data_dict['images'][self.data_dict['i_train'][idx],:,:,:].numpy()
             img = utils.to8b(img)
             # imageio.imwrite(f"img2_{idx}.png", img)
             h, w, c = img.shape
@@ -236,6 +244,13 @@ class Sam3D(ABC):
 
             # if iou.index(max(iou)) > 0.1:
             yolo_m = results[0].masks.data[iou.index(max(iou))][(h2-h)//2:(h2+h)//2,:]
+            # save yolo result for max iou
+            save_image(yolo_m, f'yolo_{idx}.png')
+
+            # save confidence
+            if self.vsgflag == False:
+                self.confidences.append(results[0].boxes.conf[iou.index(max(iou))])
+                self.idx_selected.append(iou.index(max(iou)))
 
             sam_seg_show = self.prompt_and_inverse(idx, HW, seg_m, yolo_m, dual_seg_m, depth)
 
@@ -252,6 +267,9 @@ class Sam3D(ABC):
         # imageio.imwrite(f"rgb_{idx}.png", rgb)
         # imageio.imwrite(f"seg_m_{idx}.png", utils.to8b(seg_m>0))
         # imageio.imwrite(f"recolored_img_{idx}.png", recolored_img)
+
+        # restore idx
+        idx = idx_tmp
 
         return recolored_img, sam_seg_show, idx >= len(render_poses)-1
 
@@ -447,10 +465,14 @@ class Sam3D(ABC):
                 print(f"current IoU is: {tmp_IoU}")
 
                 # by seok save yolo, rendered mask
-                # imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
-                # imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
+                imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
+                imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
 
+                # by seok change threshold from 0.5 to 0.01 to solve region not growing
+                print("Seok, iteration idx=", idx, "IoU =", tmp_IoU)
                 if tmp_IoU < 0.2:
+                # if tmp_IoU < 0.01:
+                # if tmp_IoU < 0.5:
                     print("SKIP, unacceptable sam prediction, IoU is", tmp_IoU)
                     continue
 

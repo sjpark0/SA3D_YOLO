@@ -281,7 +281,23 @@ class Sam3dGUI:
 
                     for j in gt_order:
                         tf = transforms.ToTensor()
-                        m = tf(PIL.Image.open(f'../Labeling/Set13/masks/{i:02d}_p{j+1}.png'))
+                    #///////////////////////////////1번//////////////////////////////////
+                    # i = idx+1 if idx < 16 else idx+5
+                    # m = tf(PIL.Image.open(f'../Labeling/Set1/masks/{i:02d}_p{j+1}.png'))
+                    #////////////////////////////////////////////////////////////////////
+
+                    #///////////////////////////////2번//////////////////////////////////
+                    num_list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]
+                    # if idx + 10 <= 31:
+                    #     idx += 10
+                    # else:
+                    #     idx -= 22
+                    # num_list = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+                    m = tf(PIL.Image.open(f'../Labeling/Set2/masks/{num_list[i_train_sorted[idx]]:02d}_p{j+1}.png'))
+                    imageio.imwrite(f"GT_sorted_{idx:02d}.png", m)
+                    #////////////////////////////////////////////////////////////////////
+
                         tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
                         avg_IoU[j] += tmp_IoU
                         print(f"IoU_{idx}_p{j+1} is: {tmp_IoU}")

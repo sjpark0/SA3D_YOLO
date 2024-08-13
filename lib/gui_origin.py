@@ -108,20 +108,23 @@ class Sam3dGUI:
                     # results = model_yolo.predict(source=ctx['cur_img'], imgsz=(h,w))
                     results = model_yolo.predict(source=ctx['cur_img'], imgsz=(h,w), classes=0)
                     h2, w2 = results[0].masks.data[0].shape
-                    # m = torch.zeros([h, w])
-                    # for j, img in enumerate(results[0].masks.data):
-                    #     # save_image(img, f'result_{j}.png')
-                    #     m += img[(h2-h)//2:(h2+h)//2,:]
-                    # # save_image(m, 'result.png')
+                    m = torch.zeros([h, w])
+                    for j, img in enumerate(results[0].masks.data):
+                        save_image(img, f'result_{j}.png')
+                        m += img[(h2-h)//2:(h2+h)//2,:]
 
                     # first person only
                     # p1 0, p2 2, p3 5, p4 1, p5 4, p6 3
+                    idx_select = 4
                     m = torch.zeros([h, w])
-                    img = results[0].masks.data[0]
+                    img = results[0].masks.data[idx_select]
                     m = img[(h2-h)//2:(h2+h)//2,:]
+                    self.Seg3d.confidences.append(results[0].boxes.conf[idx_select])
 
                     masks = torch.zeros([c, h, w]).cpu().numpy()
                     masks[0:3,:,:] = m.type(torch.bool).cpu().numpy()
+
+                    save_image(m, 'yolo_00.png')
 
                 else:
                     raise NotImplementedError
@@ -373,6 +376,54 @@ class Sam3dGUI:
                     self.ctx['show_rgb'] = True
                     if is_finished:
                         break
+
+                # by seok: generate view sequence and train again
+                self.Seg3d.vsgflag==True
+
+                # by seok: sort view list according to the confidence value
+                confidences = self.Seg3d.confidences
+                i_train = self.Seg3d.data_dict['i_train']
+
+                view_dict = {confidences[i]:i_train[i] for i in range(len(i_train))}
+                view_dict = dict(sorted(view_dict.items(), reverse=True))
+
+                i_train_sorted = list(view_dict.values())
+
+                # i_train_sorted = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                # i_train_sorted = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+                self.Seg3d.data_dict['i_train'] = i_train_sorted
+
+
+                img = self.Seg3d.data_dict['images'][i_train_sorted[0],:,:,:].numpy()
+                img = utils.to8b(img)
+                h, w, c = img.shape
+                results = model_yolo.predict(source=img, imgsz=(h,w), classes=0)
+                h2, w2 = results[0].masks.data[0].shape
+                m = torch.zeros([h, w])
+                idx_select = self.Seg3d.idx_selected[i_train_sorted[0]]
+                img = results[0].masks.data[idx_select]
+                m = img[(h2-h)//2:(h2+h)//2,:]
+
+                save_image(m, 'yolo_0.png')
+
+                masks = torch.zeros([c, h, w]).cpu().numpy()
+                masks[0:3,:,:] = m.type(torch.bool).cpu().numpy()
+
+                self.train_idx = 0
+                # optim in the first view
+                self.Seg3d.train_step(self.train_idx, sam_mask=masks)
+                self.train_idx += 1
+                # cross-view training
+                while True:
+                    rgb, sam_prompt, is_finished = self.Seg3d.train_step(self.train_idx)
+                    self.train_idx += 1
+                    self.ctx['fig_seg_rgb'] = rgb
+                    self.ctx['fig_sam_mask'] = sam_prompt
+                    self.ctx['show_rgb'] = True
+                    if is_finished:
+                        break
+
+
                 self.Seg3d.save_ckpt()
 
                 # by seok get rendered mask
@@ -400,20 +451,27 @@ class Sam3dGUI:
                     # h2, w2 = results[0].masks.data[0].shape
                     # m = torch.zeros([h, w])
                     # for j, img in enumerate(results[0].masks.data):
-                    #     # save_image(img, 'result_{j}.png')
+                    #     save_image(img, 'result_{idx}_{j}.png')
                     #     m += img[(h2-h)//2:(h2+h)//2,:]
                     # save_image(m, f"mask_yolo_{idx:02d}.png")
 
                     tf = transforms.ToTensor()
 
                     #///////////////////////////////1번//////////////////////////////////
-                    i = idx+1 if idx < 16 else idx+5
-                    m = tf(PIL.Image.open(f'../Labeling/Set1/masks/{i:02d}_p1.png'))
+                    # i = idx+1 if idx < 16 else idx+5
+                    # m = tf(PIL.Image.open(f'../Labeling/Set1/masks/{i:02d}_p1.png'))
                     #////////////////////////////////////////////////////////////////////
 
                     #///////////////////////////////2번//////////////////////////////////
-                    # num_list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]
-                    # m = tf(PIL.Image.open(f'../Labeling/Set2/masks/{num_list[idx]:02d}_p1.png'))
+                    num_list = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]
+                    # if idx + 10 <= 31:
+                    #     idx += 10
+                    # else:
+                    #     idx -= 22
+                    # num_list = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+                    m = tf(PIL.Image.open(f'../Labeling/Set2/masks/{num_list[i_train_sorted[idx]]:02d}_p1.png'))
+                    imageio.imwrite(f"GT_sorted_{idx:02d}.png", m)
                     #////////////////////////////////////////////////////////////////////
 
                     tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
