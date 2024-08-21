@@ -272,6 +272,11 @@ class Sam3dGUI:
                 # by seok: sort view list according to the confidence value
                 confidences = self.Seg3d.confidences
                 i_train = self.Seg3d.data_dict['i_train']
+                print(f"i_train length: {len(i_train)}, confidences length: {len(confidences)}")
+
+                min_len = min(len(confidences), len(i_train))
+                confidences = confidences[:min_len]
+                i_train = i_train[:min_len]
 
                 view_dict = {confidences[i]:i_train[i] for i in range(len(i_train))}
                 view_dict = dict(sorted(view_dict.items(), reverse=True))
@@ -343,8 +348,8 @@ class Sam3dGUI:
                         #     idx -= 22
                         # num_list = [11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-                        m = tf(PIL.Image.open(f'../Labeling/Set2/masks/{num_list[i_train_sorted[idx]]:02d}_p{j+1}.png'))
-                        imageio.imwrite(f"GT_sorted_{idx:02d}.png", m)
+                        m = tf(PIL.Image.open(f'../Labeling/Set1/masks/{num_list[i_train_sorted[idx]]:02d}_p{j+1}.png'))
+                        #imageio.imwrite(f"GT_sorted_{idx:02d}.png", m)
                         #////////////////////////////////////////////////////////////////////
 
                         tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
