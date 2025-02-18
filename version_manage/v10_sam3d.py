@@ -1,3 +1,7 @@
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 import json
 import os
 import time
@@ -202,10 +206,6 @@ class Sam3D(ABC):
         assert(idx < len(render_poses))
 
         rgb, depth, bgmap, seg_m, dual_seg_m = self.render_view(idx, [render_poses, HW, Ks])
-
-         # Rendered view를 SAM predictor에 업데이트
-        img = utils.to8b(rgb.cpu().numpy())
-        self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
                 
         if sam_mask is None:
             # Rendered view를 SAM predictor에 업데이트
@@ -230,13 +230,6 @@ class Sam3D(ABC):
 
             # if iou.index(max(iou)) > 0.1:
             yolo_m = results[0].masks.data[iou.index(max(iou))][(h2-h)//2:(h2+h)//2,:]
-            # save yolo result for max iou
-            save_image(yolo_m, f'yolo_{idx}.png')
-
-            # save confidence
-            if self.vsgflag == False:
-                self.confidences.append(results[0].boxes.conf[iou.index(max(iou))])
-                self.idx_selected[self.data_dict['i_train'][idx]] = iou.index(max(iou))
 
             sam_seg_show = self.prompt_and_inverse(idx, HW, seg_m, yolo_m, dual_seg_m, depth)
 
@@ -445,8 +438,8 @@ class Sam3D(ABC):
                 print(f"current IoU is: {tmp_IoU}")
 
                 # by seok save yolo, rendered mask
-                # imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
-                # imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
+                imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
+                imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
 
                 # by seok change threshold from 0.5 to 0.01 to solve region not growing
                 print("Seok, iteration idx=", idx, "IoU =", tmp_IoU)

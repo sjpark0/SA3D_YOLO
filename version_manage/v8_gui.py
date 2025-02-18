@@ -1,10 +1,7 @@
 import logging
 
-# logging.basicConfig(level=logging.WARNING)
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # logging.basicConfig(level=logging.DEBUG)
-logging.basicConfig(level=logging.ERROR)
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 import os
 # os.environ['CUDA_VISIBLE_DEVICES'] = '1'
@@ -33,16 +30,33 @@ from scipy.spatial.transform import Rotation as R
 
 # model_yolo = YOLO('yolov8n.pt')
 model_yolo = YOLO('yolov8x-seg.pt')
-best_view_idx = None  # 전역 변수로 선언
 
-def compute_pose_distance(pose1, pose2, w=0.5):
-    pose1_cpu = pose1.cpu().numpy() if isinstance(pose1, torch.Tensor) else pose1
-    pose2_cpu = pose2.cpu().numpy() if isinstance(pose2, torch.Tensor) else pose2
-    r1, r2 = R.from_matrix(pose1_cpu[:3, :3]), R.from_matrix(pose2_cpu[:3, :3])
-    angle_diff = (r1.inv() * r2).magnitude()
-    trans_diff = np.linalg.norm(pose1_cpu[:3, 3] - pose2_cpu[:3, 3])
-    
-    return trans_diff + angle_diff
+def calculate_pose_distances(poses):
+    logging.debug(f"Calculating distances for {len(poses)} poses")
+    num_poses = len(poses)
+    distance_matrix = np.zeros((num_poses, num_poses))
+
+    for i, pose1 in enumerate(poses):
+        for j, pose2 in enumerate(poses[i+1:], start=i+1):
+            pose1_cpu = pose1.cpu().numpy() if isinstance(pose1, torch.Tensor) else pose1
+            pose2_cpu = pose2.cpu().numpy() if isinstance(pose2, torch.Tensor) else pose2
+            r1, r2 = R.from_matrix(pose1_cpu[:3, :3]), R.from_matrix(pose2_cpu[:3, :3])
+            angle_diff = (r1.inv() * r2).magnitude()
+            trans_diff = np.linalg.norm(pose1_cpu[:3, 3] - pose2_cpu[:3, 3])
+            distance_matrix[i, j] = distance_matrix[j, i] = angle_diff + trans_diff
+
+    sorted_indices = [0]
+    current_index = 0
+    while len(sorted_indices) < num_poses:
+        next_distances = [(current_index, j, distance_matrix[current_index, j]) for j in range(num_poses) if j not in sorted_indices]
+        if not next_distances:
+            remaining = set(range(num_poses)) - set(sorted_indices)
+            current_index = min(remaining)
+        else:
+            _, current_index, _ = min(next_distances, key=lambda x: x[2])
+        sorted_indices.append(current_index)
+
+    return sorted_indices
 
 def mark_image(_img, points):
     assert(len(points) > 0)
@@ -64,34 +78,6 @@ def draw_figure(fig, title, animation_frame=None):
     fig.update_yaxes(showticklabels=False)
     return fig
 
-def find_view_with_max_objects(data_dict, yolo_model):
-    """
-    모든 객체가 가장 잘 보이는 뷰를 선택하는 함수
-    Args:
-        data_dict: 학습 데이터 (images, poses, etc.)
-        yolo_model: YOLO 모델 객체
-    Returns:
-        best_view_idx: 가장 많은 객체가 감지된 뷰의 인덱스
-        max_instances: 해당 뷰에서 감지된 총 객체 수
-    """
-    max_instances = 0
-    best_view_idx = 0
-
-    for idx in range(len(data_dict['i_train'])):
-        img = data_dict['images'][idx, :, :, :].numpy()
-        img = utils.to8b(img)
-        h, w, c = img.shape
-
-        # YOLO로 객체 감지
-        results = yolo_model.predict(source=img, imgsz=(h, w))
-        num_instances = len(results[0].boxes)  # 감지된 객체 수
-
-        if num_instances > max_instances:
-            max_instances = num_instances
-            best_view_idx = idx
-
-    return best_view_idx, max_instances
-
 
 class Sam3dGUI:
     def __init__(self, Seg3d, debug=False):
@@ -111,18 +97,7 @@ class Sam3dGUI:
         self.train_idx = 0
 
     def run(self):
-        global best_view_idx  # 전역 변수 사용
         init_rgb = self.Seg3d.init_model()
-
-        # 모든 객체가 잘 보이는 뷰를 선택
-        best_view_idx, max_instances = find_view_with_max_objects(self.Seg3d.data_dict, model_yolo)
-
-        logging.info(f"Best view with max objects: {best_view_idx} (Instances: {max_instances})")
-
-        # 선택된 뷰에서 초기 이미지 설정
-        init_rgb = self.Seg3d.data_dict['images'][best_view_idx, :, :, :].numpy()
-        init_rgb = utils.to8b(init_rgb)
-
         self.ctx['cur_img'] = init_rgb
         self.run_app(sam_pred=self.Seg3d.predictor, ctx=self.ctx, init_rgb=init_rgb)
 
@@ -152,7 +127,7 @@ class Sam3dGUI:
 
                     # first person only
                     # p1 0, p2 2, p3 5, p4 1, p5 4, p6 3
-                    idx_select = 4
+                    idx_select = 0
                     m = torch.zeros([h, w])
                     img = results[0].masks.data[idx_select]
                     m = img[(h2-h)//2:(h2+h)//2,:]
@@ -402,33 +377,10 @@ class Sam3dGUI:
             else:
                 logging.debug("Starting training process")
                 # optim in the first view
-
-                # 1. 실제 뷰 ID 리스트
-                all_view_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
-
-                print("valid_views:", all_view_ids)  # valid_views 리스트 출력
-                print("best_view_idx:", best_view_idx)  # best_view_idx 값 출력
-
-                start_idx = best_view_idx
-                
-                # 3. best_view_idx부터 끝까지 순차적으로 진행
-                view_order = all_view_ids[start_idx:] + all_view_ids[:start_idx]
-
-                print("view_order:", view_order)  # best_view_idx 값 출력
-
-                view_id_to_index = {view_id: index for index, view_id in enumerate(all_view_ids)}
-                i_train_sorted_1 = [view_id_to_index[view_id] for view_id in view_order]
-
-                self.Seg3d.data_dict['i_train'] = i_train_sorted_1  # 학습 순서 갱신
-
-                # render_poses, HW, Ks 갱신
-                self.Seg3d.update_render_poses()
-
-                self.train_idx = 0
-                # `train_step` 호출
                 self.Seg3d.train_step(self.train_idx, sam_mask=ctx['masks'][ctx['select_mask_id']])
-                self.train_idx += 1  # train_idx 증가
+                self.train_idx += 1
 
+                # cross-view training
                 while True:
                     rgb, sam_prompt, is_finished = self.Seg3d.train_step(self.train_idx)
                     self.train_idx += 1
@@ -436,12 +388,11 @@ class Sam3dGUI:
                     self.ctx['fig_sam_mask'] = sam_prompt
                     self.ctx['show_rgb'] = True
                     logging.info(f"Updated fig_seg_rgb and fig_sam_mask at train_idx {self.train_idx}")
-                    
                     if is_finished:
                         break
 
                 # 학습순서선정/학습수행 플래그 설정
-                self.Seg3d.vsgflag = True  # 할당 연산자
+                self.Seg3d.vsgflag = True  # 할당 연산자 수정
 
                 
                 # by seok: sort view list according to the confidence value
@@ -452,7 +403,6 @@ class Sam3dGUI:
                 # 뷰 ID와 인덱스 간의 매핑 생성
                 view_id_to_index = {view_id: index for index, view_id in enumerate(view_ids)}
                 index_to_view_id = {index: view_id for index, view_id in enumerate(view_ids)}
-                i_train_sorted_1_to_view_id = [index_to_view_id[i] for i in i_train_sorted_1]
 
                 max_conf_idx = confidences.index(max(confidences))
                 sorted_indices = [max_conf_idx]
@@ -465,41 +415,75 @@ class Sam3dGUI:
                 # 이전 시점과 가장 가까운 시점을 순차적으로 선택
                 while available_indices:
                     current_pose = poses[sorted_indices[-1]]
-                    distances = {idx: compute_pose_distance(current_pose, poses[idx]) 
-                                for idx in available_indices}
-                    next_idx = min(distances.items(), key=lambda x: x[1])[0]
+                    min_distance = float('inf')
+                    next_idx = None
+                    
+                    for idx in available_indices:
+                        next_pose = poses[idx]
+                        # 포즈 간 거리 계산
+                        current_pose_cpu = current_pose.cpu().numpy() if isinstance(current_pose, torch.Tensor) else current_pose
+                        next_pose_cpu = next_pose.cpu().numpy() if isinstance(next_pose, torch.Tensor) else next_pose
+                        
+                        r1 = R.from_matrix(current_pose_cpu[:3, :3])
+                        r2 = R.from_matrix(next_pose_cpu[:3, :3])
+                        angle_diff = (r1.inv() * r2).magnitude()
+                        trans_diff = np.linalg.norm(current_pose_cpu[:3, 3] - next_pose_cpu[:3, 3])
+                        distance = angle_diff + trans_diff
+                        
+                        if distance < min_distance:
+                            min_distance = distance
+                            next_idx = idx
+    
                     sorted_indices.append(next_idx)
                     available_indices.remove(next_idx)
 
                 # 정렬된 인덱스를 뷰 ID로 변환
-                sorted_view_ids = [i_train_sorted_1_to_view_id[i] for i in sorted_indices]
+                sorted_view_ids = [index_to_view_id[i] for i in sorted_indices]
                 i_train_sorted = [view_id_to_index[view_id] for view_id in sorted_view_ids]
 
                 self.Seg3d.data_dict['i_train'] = i_train_sorted  # 학습 순서 갱신
-                logging.info(f"sorted_indices: {sorted_indices}")
+
                 logging.info(f"Initial view (highest confidence): {index_to_view_id[max_conf_idx]}")
                 logging.info(f"New training order: {sorted_view_ids}")
                 
                 # render_poses, HW, Ks 갱신
                 self.Seg3d.update_render_poses()
+                
+                # train_idx 초기화
+                self.train_idx = 0
 
-                img = self.Seg3d.data_dict['images'][i_train_sorted[0], :, :, :].numpy()
+                # 정렬된 순서대로 YOLO 학습 수행
+                idx = self.Seg3d.data_dict['i_train'][self.train_idx]
+                img = self.Seg3d.data_dict['images'][idx, :, :, :].numpy()
                 img = utils.to8b(img)
                 h, w, c = img.shape
+
+                # YOLO 예측 및 마스크 생성
                 results = model_yolo.predict(source=img, imgsz=(h, w), classes=0)
                 h2, w2 = results[0].masks.data[0].shape
+
                 m = torch.zeros([h, w])
-                idx_select = self.Seg3d.idx_selected[i_train_sorted[0]]
+                # idx를 뷰 ID로 변환
+                view_id = index_to_view_id[idx]
+
+                if view_id >= len(self.Seg3d.idx_selected):
+                    logging.warning(f"Invalid view_id {view_id}. Using default idx_select 0.")
+                    idx_select = 0
+                else:
+                    idx_select = self.Seg3d.idx_selected[view_id]
+
+                if idx_select >= len(results[0].masks.data):
+                    logging.warning(f"idx_select {idx_select} is out of bounds. Adjusting to valid range.")
+                    idx_select = len(results[0].masks.data) - 1
+
                 mask_img = results[0].masks.data[idx_select]
                 m = mask_img[(h2 - h) // 2 : (h2 + h) // 2, :]
 
                 # 마스크 이미지 저장
-                save_image(m, f'yolo_0.png')
+                save_image(m, f'yolo_{idx_select}.png')
                 masks = torch.zeros([c, h, w]).cpu().numpy()
                 masks[0:3, :, :] = m.type(torch.bool).cpu().numpy()
 
-                # train_idx 초기화
-                self.train_idx = 0
                 # 학습 진행
                 self.Seg3d.train_step(self.train_idx, sam_mask=masks)
                 self.train_idx += 1
@@ -528,20 +512,13 @@ class Sam3dGUI:
                     tmp_rendered_mask = seg_m.detach().cpu().clone()
                     tmp_rendered_mask[tmp_rendered_mask < 0] = 0
                     tmp_rendered_mask[tmp_rendered_mask != 0] = 1
-                    # imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
+                    imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
 
                     # Ground Truth 마스크 로드 및 IoU 계산
                     tf = transforms.ToTensor()
                     current_view_id = sorted_view_ids[idx]
-                    m = tf(PIL.Image.open(f'../Labeling/Set11/masks/{current_view_id:02d}_p5.png'))  # 수정
-                    m_numpy = m.cpu().numpy()
-                    if m_numpy.ndim == 3 and m_numpy.shape[0] == 1:  # 단일 채널 텐서
-                        m_numpy = m_numpy.squeeze(axis=0)  # 2D 배열로 변환
-                    elif m_numpy.ndim == 2:
-                        pass  # 이미 2D 배열
-                    else:
-                        raise ValueError("Input tensor has unsupported dimensions for saving.")
-                    imageio.imwrite(f"GT_sorted_{idx:02d}.png", m_numpy)
+                    m = tf(PIL.Image.open(f'../Labeling/Set1/masks/{current_view_id:02d}_p1.png'))
+                    imageio.imwrite(f"GT_sorted_{idx:02d}.png", m)
                     tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
                     avg_IoU += tmp_IoU
                     f.write(f"{tmp_IoU}\n")
@@ -557,8 +534,7 @@ class Sam3dGUI:
                 return html.Div("Train Stage Finished! Press Ctrl+C to Exit!"), fig_masked_rgb, fig_seged_rgb
             
         
-        #app.run_server(debug=self.debug)
-        app.run_server(debug=False, dev_tools_ui=False, dev_tools_props_check=False)
+        app.run_server(debug=self.debug)
 
 if __name__ == '__main__':
     from segment_anything import (SamAutomaticMaskGenerator, SamPredictor,

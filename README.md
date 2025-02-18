@@ -19,7 +19,9 @@ Then install the dependencies:
 conda create -n sa3d python=3.10
 conda activate sa3d_yolo
 pip install -r requirements.txt
-conda install nvidia/label/cuda-11.6.0::cuda-toolkit
+conda install -c anaconda -c conda-forge cudatoolkit==11.6
+conda install -c anaconda cudnn
+conda install -c conda-forge cudatoolkit-dev
 pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 

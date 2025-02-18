@@ -1,6 +1,5 @@
 import logging
 
-# logging.basicConfig(level=logging.WARNING)
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.ERROR)
@@ -38,11 +37,10 @@ best_view_idx = None  # 전역 변수로 선언
 def compute_pose_distance(pose1, pose2, w=0.5):
     pose1_cpu = pose1.cpu().numpy() if isinstance(pose1, torch.Tensor) else pose1
     pose2_cpu = pose2.cpu().numpy() if isinstance(pose2, torch.Tensor) else pose2
-    r1, r2 = R.from_matrix(pose1_cpu[:3, :3]), R.from_matrix(pose2_cpu[:3, :3])
-    angle_diff = (r1.inv() * r2).magnitude()
+    
     trans_diff = np.linalg.norm(pose1_cpu[:3, 3] - pose2_cpu[:3, 3])
     
-    return trans_diff + angle_diff
+    return trans_diff
 
 def mark_image(_img, points):
     assert(len(points) > 0)
@@ -152,16 +150,17 @@ class Sam3dGUI:
 
                     # first person only
                     # p1 0, p2 2, p3 5, p4 1, p5 4, p6 3
-                    idx_select = 4
+                    idx_select = 4  # 수정
                     m = torch.zeros([h, w])
                     img = results[0].masks.data[idx_select]
                     m = img[(h2-h)//2:(h2+h)//2,:]
                     self.Seg3d.confidences.append(results[0].boxes.conf[idx_select])
 
+                    save_image(m, 'yolo_00.png')
                     masks = torch.zeros([c, h, w]).cpu().numpy()
                     masks[0:3,:,:] = m.type(torch.bool).cpu().numpy()
 
-                    save_image(m, 'yolo_00.png')
+                    
 
                 else:
                     raise NotImplementedError
@@ -427,7 +426,8 @@ class Sam3dGUI:
                 self.train_idx = 0
                 # `train_step` 호출
                 self.Seg3d.train_step(self.train_idx, sam_mask=ctx['masks'][ctx['select_mask_id']])
-                self.train_idx += 1  # train_idx 증가
+                #self.train_idx += 1  # train_idx 증가
+                
 
                 while True:
                     rgb, sam_prompt, is_finished = self.Seg3d.train_step(self.train_idx)
@@ -528,12 +528,12 @@ class Sam3dGUI:
                     tmp_rendered_mask = seg_m.detach().cpu().clone()
                     tmp_rendered_mask[tmp_rendered_mask < 0] = 0
                     tmp_rendered_mask[tmp_rendered_mask != 0] = 1
-                    # imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
+                    imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
 
                     # Ground Truth 마스크 로드 및 IoU 계산
                     tf = transforms.ToTensor()
                     current_view_id = sorted_view_ids[idx]
-                    m = tf(PIL.Image.open(f'../Labeling/Set11/masks/{current_view_id:02d}_p5.png'))  # 수정
+                    m = tf(PIL.Image.open(f'../Labeling/Set1/masks/{current_view_id:02d}_p3.png'))  # 수정
                     m_numpy = m.cpu().numpy()
                     if m_numpy.ndim == 3 and m_numpy.shape[0] == 1:  # 단일 채널 텐서
                         m_numpy = m_numpy.squeeze(axis=0)  # 2D 배열로 변환

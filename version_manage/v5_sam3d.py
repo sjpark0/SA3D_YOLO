@@ -1,3 +1,7 @@
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 import json
 import os
 import time
@@ -198,19 +202,22 @@ class Sam3D(ABC):
 
 
     def train_step(self, idx, sam_mask=None):
-        render_poses, HW, Ks = fetch_seg_poses(self.args.seg_poses, self.data_dict)
-        assert(idx < len(render_poses))
+        # 함수 내부에서 인스턴스 변수 사용
+        render_poses = self.render_poses
+        HW = self.HW
+        Ks = self.Ks
+        # idx가 render_poses 길이를 초과하지 않도록 예외 처리
+        if idx >= len(render_poses):
+            logging.warning(f"Index {idx} exceeds render_poses length {len(render_poses)}. Skipping this step.")
+            return None, None, True  # True 반환으로 학습 종료 신호를 보냅니다.
 
         rgb, depth, bgmap, seg_m, dual_seg_m = self.render_view(idx, [render_poses, HW, Ks])
 
-         # Rendered view를 SAM predictor에 업데이트
+        # Rendered view를 SAM predictor에 업데이트
         img = utils.to8b(rgb.cpu().numpy())
         self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
                 
         if sam_mask is None:
-            # Rendered view를 SAM predictor에 업데이트
-            img = utils.to8b(rgb.cpu().numpy())
-            self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
             img = self.data_dict['images'][self.data_dict['i_train'][idx],:,:,:].numpy()
             img = utils.to8b(img)
             h, w, c = img.shape
@@ -445,8 +452,8 @@ class Sam3D(ABC):
                 print(f"current IoU is: {tmp_IoU}")
 
                 # by seok save yolo, rendered mask
-                # imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
-                # imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
+                imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
+                imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
 
                 # by seok change threshold from 0.5 to 0.01 to solve region not growing
                 print("Seok, iteration idx=", idx, "IoU =", tmp_IoU)

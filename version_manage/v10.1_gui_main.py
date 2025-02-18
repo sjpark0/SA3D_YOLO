@@ -1,6 +1,5 @@
 import logging
 
-# logging.basicConfig(level=logging.WARNING)
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig(level=logging.ERROR)
@@ -38,11 +37,10 @@ best_view_idx = None  # 전역 변수로 선언
 def compute_pose_distance(pose1, pose2, w=0.5):
     pose1_cpu = pose1.cpu().numpy() if isinstance(pose1, torch.Tensor) else pose1
     pose2_cpu = pose2.cpu().numpy() if isinstance(pose2, torch.Tensor) else pose2
-    r1, r2 = R.from_matrix(pose1_cpu[:3, :3]), R.from_matrix(pose2_cpu[:3, :3])
-    angle_diff = (r1.inv() * r2).magnitude()
+    
     trans_diff = np.linalg.norm(pose1_cpu[:3, 3] - pose2_cpu[:3, 3])
     
-    return trans_diff + angle_diff
+    return trans_diff
 
 def mark_image(_img, points):
     assert(len(points) > 0)
@@ -152,7 +150,7 @@ class Sam3dGUI:
 
                     # first person only
                     # p1 0, p2 2, p3 5, p4 1, p5 4, p6 3
-                    idx_select = 4
+                    idx_select = 1  # 수정
                     m = torch.zeros([h, w])
                     img = results[0].masks.data[idx_select]
                     m = img[(h2-h)//2:(h2+h)//2,:]
@@ -408,11 +406,12 @@ class Sam3dGUI:
 
                 print("valid_views:", all_view_ids)  # valid_views 리스트 출력
                 print("best_view_idx:", best_view_idx)  # best_view_idx 값 출력
-
-                start_idx = best_view_idx
                 
                 # 3. best_view_idx부터 끝까지 순차적으로 진행
-                view_order = all_view_ids[start_idx:] + all_view_ids[:start_idx]
+                view_order = all_view_ids[all_view_ids.index(best_view_idx):]  # best_view_idx부터 순차적으로 진행
+                
+                # 4. 그 후 0부터 best_view_idx-1까지 순차적으로 진행
+                view_order += all_view_ids[:all_view_ids.index(best_view_idx)]  # 이전 뷰들을 추가
 
                 print("view_order:", view_order)  # best_view_idx 값 출력
 
@@ -528,12 +527,12 @@ class Sam3dGUI:
                     tmp_rendered_mask = seg_m.detach().cpu().clone()
                     tmp_rendered_mask[tmp_rendered_mask < 0] = 0
                     tmp_rendered_mask[tmp_rendered_mask != 0] = 1
-                    # imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
+                    imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
 
                     # Ground Truth 마스크 로드 및 IoU 계산
                     tf = transforms.ToTensor()
                     current_view_id = sorted_view_ids[idx]
-                    m = tf(PIL.Image.open(f'../Labeling/Set11/masks/{current_view_id:02d}_p5.png'))  # 수정
+                    m = tf(PIL.Image.open(f'../Labeling/Set11/masks/{current_view_id:02d}_p1.png'))  # 수정
                     m_numpy = m.cpu().numpy()
                     if m_numpy.ndim == 3 and m_numpy.shape[0] == 1:  # 단일 채널 텐서
                         m_numpy = m_numpy.squeeze(axis=0)  # 2D 배열로 변환

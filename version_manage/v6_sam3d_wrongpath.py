@@ -1,3 +1,7 @@
+import logging
+
+logging.basicConfig(level=logging.WARNING)
+
 import json
 import os
 import time
@@ -22,6 +26,9 @@ from .render_utils import render_fn
 # seok
 from ultralytics import YOLO
 from torchvision.utils import save_image
+
+from scipy.spatial.transform import Rotation as R
+
 model_yolo = YOLO('yolov8x-seg.pt')
 
 class Sam3D(ABC):
@@ -30,6 +37,7 @@ class Sam3D(ABC):
                  data_dict, device=torch.device('cuda'), stage='coarse', coarse_ckpt_path=None):
         self.cfg = cfg
         self.args = args
+        self.data_dict = data_dict
         if args.mobile_sam:
             from mobile_sam import sam_model_registry
 
@@ -49,6 +57,10 @@ class Sam3D(ABC):
             self.sam = sam_model_registry[model_type](checkpoint=sam_checkpoint).to(device)
         self.predictor = SamPredictor(self.sam)
         print("SAM initializd.")
+
+        self.init_image = self.data_dict['images'][self.data_dict['i_train'][0]].numpy()
+        self.init_image = utils.to8b(self.init_image)
+        self.predictor.set_image(self.init_image)
         self.step_size = cfg.fine_model_and_render.stepsize
         self.device = device
         self.segment = args.segment
@@ -64,10 +76,118 @@ class Sam3D(ABC):
         self.coarse_ckpt_path = coarse_ckpt_path
         self.render_poses, self.HW, self.Ks = fetch_seg_poses(self.args.seg_poses, self.data_dict)
 
-        # by seok optimal view sequence generation
-        self.vsgflag = False
         self.confidences = []
         self.idx_selected = [0] * len(data_dict['i_train'])
+
+        #by young
+        # 뷰 ID와 인덱스 매핑 초기화
+        self.view_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 
+                        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+        self.view_id_to_index = {view_id: i for i, view_id in enumerate(self.view_ids)}
+        self.index_to_view_id = {i: view_id for i, view_id in enumerate(self.view_ids)}
+        
+        # 초기 데이터 정렬
+        self._sort_training_data()
+
+    def _sort_training_data(self):
+        """confidence가 가장 높은 시점을 첫 번째로 하고, 순차적으로 가까운 시점 선택"""
+        # 1. YOLO confidence 계산
+        confidences = []
+        
+        for idx in self.data_dict['i_train']:
+            img = self.data_dict['images'][idx].numpy()
+            img = utils.to8b(img)
+            h, w, c = img.shape
+            results = model_yolo.predict(source=img, imgsz=(h,w), classes=0)
+            if len(results[0].boxes) > 0:
+                # 특정 인덱스(원하는 사람)의 confidence만 저장
+                target_person_idx = 5  # 원하는 사람의 인덱스 (예: 4번째 사람)
+                if target_person_idx < len(results[0].boxes):
+                    view_id = self.index_to_view_id[idx]
+                    confidences.append((view_id, results[0].boxes.conf[target_person_idx].item()))
+                else:
+                    view_id = self.index_to_view_id[idx]
+                    confidences.append((view_id, 0.0))
+            else:
+                view_id = self.index_to_view_id[idx]
+                confidences.append((view_id, 0.0))
+        
+        # 2. confidence가 가장 높은 시점 찾기
+        max_conf_idx = max(confidences, key=lambda x: x[1])[0]
+        
+        # 3. 모든 포즈 가져오기
+        poses = self.data_dict['poses'][self.data_dict['i_train']]
+        num_poses = len(poses)
+        
+        # 4. 순차적으로 가장 가까운 시점 찾기
+        sorted_indices = [self.view_id_to_index[max_conf_idx]]
+        remaining_indices = set(range(num_poses)) - {self.view_id_to_index[max_conf_idx]}
+        
+        while remaining_indices:
+            current_pose = poses[sorted_indices[-1]]
+            min_distance = float('inf')
+            next_index = None
+            
+            # 현재 시점에서 가장 가까운 다음 시점 찾기
+            for i in remaining_indices:
+                pose = poses[i]
+                
+                pose_cpu = pose.cpu().numpy() if isinstance(pose, torch.Tensor) else pose
+                current_pose_cpu = current_pose.cpu().numpy() if isinstance(current_pose, torch.Tensor) else current_pose
+                
+                r1 = R.from_matrix(pose_cpu[:3, :3])
+                r2 = R.from_matrix(current_pose_cpu[:3, :3])
+                angle_diff = (r1.inv() * r2).magnitude()
+                trans_diff = np.linalg.norm(pose_cpu[:3, 3] - current_pose_cpu[:3, 3])
+                
+                distance = angle_diff + trans_diff
+                
+                if distance < min_distance:
+                    min_distance = distance
+                    next_index = i
+            
+            sorted_indices.append(next_index)
+            remaining_indices.remove(next_index)
+        
+        # 5. 정렬된 인덱스를 뷰 ID로 변환
+        sorted_view_ids = [self.index_to_view_id[i] for i in sorted_indices]
+        i_train_sorted = [self.view_id_to_index[view_id] for view_id in sorted_view_ids]
+        
+        # 6. 데이터 딕셔너리 업데이트
+        self.data_dict['i_train'] = i_train_sorted
+        self.update_render_poses()
+
+    def calculate_pose_distances(self, poses):
+        """포즈 간의 거리를 계산하고 최적의 순서를 반환하는 메서드"""
+        logging.debug(f"Calculating distances for {len(poses)} poses")
+        num_poses = len(poses)
+        distance_matrix = np.zeros((num_poses, num_poses))
+
+        for i, pose1 in enumerate(poses):
+            for j, pose2 in enumerate(poses[i+1:], start=i+1):
+                pose1_cpu = pose1.cpu().numpy() if isinstance(pose1, torch.Tensor) else pose1
+                pose2_cpu = pose2.cpu().numpy() if isinstance(pose2, torch.Tensor) else pose2
+                
+                r1, r2 = R.from_matrix(pose1_cpu[:3, :3]), R.from_matrix(pose2_cpu[:3, :3])
+                angle_diff = (r1.inv() * r2).magnitude()
+                trans_diff = np.linalg.norm(pose1_cpu[:3, 3] - pose2_cpu[:3, 3])
+                
+                distance_matrix[i, j] = distance_matrix[j, i] = angle_diff + trans_diff
+
+        sorted_indices = [0]
+        current_index = 0
+        
+        while len(sorted_indices) < num_poses:
+            next_distances = [(current_index, j, distance_matrix[current_index, j]) 
+                            for j in range(num_poses) if j not in sorted_indices]
+            if not next_distances:
+                remaining = set(range(num_poses)) - set(sorted_indices)
+                current_index = min(remaining)
+            else:
+                _, current_index, _ = min(next_distances, key=lambda x: x[2])
+            sorted_indices.append(current_index)
+
+        return sorted_indices
 
 
 
@@ -198,19 +318,22 @@ class Sam3D(ABC):
 
 
     def train_step(self, idx, sam_mask=None):
-        render_poses, HW, Ks = fetch_seg_poses(self.args.seg_poses, self.data_dict)
-        assert(idx < len(render_poses))
+        # 함수 내부에서 인스턴스 변수 사용
+        render_poses = self.render_poses
+        HW = self.HW
+        Ks = self.Ks
+        # idx가 render_poses 길이를 초과하지 않도록 예외 처리
+        if idx >= len(render_poses):
+            logging.warning(f"Index {idx} exceeds render_poses length {len(render_poses)}. Skipping this step.")
+            return None, None, True  # True 반환으로 학습 종료 신호를 보냅니다.
 
         rgb, depth, bgmap, seg_m, dual_seg_m = self.render_view(idx, [render_poses, HW, Ks])
 
-         # Rendered view를 SAM predictor에 업데이트
+        # Rendered view를 SAM predictor에 업데이트
         img = utils.to8b(rgb.cpu().numpy())
         self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
                 
         if sam_mask is None:
-            # Rendered view를 SAM predictor에 업데이트
-            img = utils.to8b(rgb.cpu().numpy())
-            self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
             img = self.data_dict['images'][self.data_dict['i_train'][idx],:,:,:].numpy()
             img = utils.to8b(img)
             h, w, c = img.shape
@@ -232,11 +355,6 @@ class Sam3D(ABC):
             yolo_m = results[0].masks.data[iou.index(max(iou))][(h2-h)//2:(h2+h)//2,:]
             # save yolo result for max iou
             save_image(yolo_m, f'yolo_{idx}.png')
-
-            # save confidence
-            if self.vsgflag == False:
-                self.confidences.append(results[0].boxes.conf[iou.index(max(iou))])
-                self.idx_selected[self.data_dict['i_train'][idx]] = iou.index(max(iou))
 
             sam_seg_show = self.prompt_and_inverse(idx, HW, seg_m, yolo_m, dual_seg_m, depth)
 
@@ -445,8 +563,8 @@ class Sam3D(ABC):
                 print(f"current IoU is: {tmp_IoU}")
 
                 # by seok save yolo, rendered mask
-                # imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
-                # imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
+                imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
+                imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
 
                 # by seok change threshold from 0.5 to 0.01 to solve region not growing
                 print("Seok, iteration idx=", idx, "IoU =", tmp_IoU)
