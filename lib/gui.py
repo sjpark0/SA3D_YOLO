@@ -1,4 +1,5 @@
 import logging
+from collections import deque
 
 # logging.basicConfig(level=logging.WARNING)
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -74,23 +75,57 @@ def find_view_with_max_objects(data_dict, yolo_model):
         best_view_idx: 가장 많은 객체가 감지된 뷰의 인덱스
         max_instances: 해당 뷰에서 감지된 총 객체 수
     """
-    max_instances = 0
+    # max_instances = 0
+    # best_view_idx = 0
+
+    # for idx in range(len(data_dict['i_train'])):
+    #     img = data_dict['images'][idx, :, :, :].numpy()
+    #     img = utils.to8b(img)
+    #     h, w, c = img.shape
+
+    #     # YOLO로 객체 감지
+    #     results = yolo_model.predict(source=img, imgsz=(h, w))
+    #     num_instances = len(results[0].boxes)  # 감지된 객체 수
+
+    #     if num_instances > max_instances:
+    #         max_instances = num_instances
+    #         best_view_idx = idx
+
+    # return best_view_idx, max_instances
+
+    max_score = -float('inf')
     best_view_idx = 0
 
     for idx in range(len(data_dict['i_train'])):
-        img = data_dict['images'][idx, :, :, :].numpy()
+        img = data_dict['images'][idx].numpy()
         img = utils.to8b(img)
         h, w, c = img.shape
+        
+        # YOLO 추론 (이미지 크기 자동 조정 방지)
+        results = yolo_model.predict(
+            source=img, 
+            imgsz=(h, w),  # 원본 해상도 유지
+            classes=0,  # person 클래스만 검출
+            stream=False  # 단일 이미지 처리
+        )
+        
+        # 신뢰도 및 객체 수 계산
+        if len(results[0].boxes) == 0:
+            continue  # 객체 미검출 시 건너뜀
+            
+        confidences = results[0].boxes.conf.cpu().numpy()
+        num_instances = len(results[0].boxes)
+        
+        # 종합 점수 계산 (신뢰도 70% + 객체 수 30%)
+        conf_sum = np.sum(confidences)
+        score = (conf_sum * 0.7) + (num_instances * 0.3)
 
-        # YOLO로 객체 감지
-        results = yolo_model.predict(source=img, imgsz=(h, w))
-        num_instances = len(results[0].boxes)  # 감지된 객체 수
-
-        if num_instances > max_instances:
-            max_instances = num_instances
+        # 최대 점수 갱신
+        if score > max_score:
+            max_score = score
             best_view_idx = idx
 
-    return best_view_idx, max_instances
+    return best_view_idx, max_score
 
 
 class Sam3dGUI:
@@ -147,12 +182,12 @@ class Sam3dGUI:
                     h2, w2 = results[0].masks.data[0].shape
                     m = torch.zeros([h, w])
                     for j, img in enumerate(results[0].masks.data):
-                        save_image(img, f'result_{j}.png')
+                        # save_image(img, f'result_{j}.png')
                         m += img[(h2-h)//2:(h2+h)//2,:]
 
                     # first person only
                     # p1 0, p2 2, p3 5, p4 1, p5 4, p6 3
-                    idx_select = 4
+                    idx_select = 0
                     m = torch.zeros([h, w])
                     img = results[0].masks.data[idx_select]
                     m = img[(h2-h)//2:(h2+h)//2,:]
@@ -161,7 +196,7 @@ class Sam3dGUI:
                     masks = torch.zeros([c, h, w]).cpu().numpy()
                     masks[0:3,:,:] = m.type(torch.bool).cpu().numpy()
 
-                    save_image(m, 'yolo_00.png')
+                    # save_image(m, 'yolo_00.png')
 
                 else:
                     raise NotImplementedError
@@ -417,6 +452,7 @@ class Sam3dGUI:
                 print("view_order:", view_order)  # best_view_idx 값 출력
 
                 view_id_to_index = {view_id: index for index, view_id in enumerate(all_view_ids)}
+                index_to_view_id = {index: view_id for index, view_id in enumerate(all_view_ids)}
                 i_train_sorted_1 = [view_id_to_index[view_id] for view_id in view_order]
 
                 self.Seg3d.data_dict['i_train'] = i_train_sorted_1  # 학습 순서 갱신
@@ -447,38 +483,62 @@ class Sam3dGUI:
                 # by seok: sort view list according to the confidence value
                 confidences = self.Seg3d.confidences
 
-                # 데이터셋의 실제 뷰 ID 리스트
-                view_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30 , 31, 32, 33, 34, 35, 36]  # 실제 뷰 ID 리스트를 정확히 입력
-                # 뷰 ID와 인덱스 간의 매핑 생성
-                view_id_to_index = {view_id: index for index, view_id in enumerate(view_ids)}
-                index_to_view_id = {index: view_id for index, view_id in enumerate(view_ids)}
                 i_train_sorted_1_to_view_id = [index_to_view_id[i] for i in i_train_sorted_1]
 
                 max_conf_idx = confidences.index(max(confidences))
                 sorted_indices = [max_conf_idx]
+                available_indices = list(range(len(confidences)))
+                available_indices.remove(max_conf_idx)
+                history_window = deque(maxlen=4)  # 최근 4개 뷰 추적
+                history_window.append(max_conf_idx)
 
                 # by young : sort view list according to the pose distances
                 # 포즈 거리 기반으로 정렬된 순서에 따라 학습 진행
                 poses = self.Seg3d.data_dict['poses'][self.Seg3d.data_dict['i_train']]
-                available_indices = set(range(len(poses))) - {max_conf_idx}
+                # available_indices = set(range(len(poses))) - {max_conf_idx}
 
                 # 이전 시점과 가장 가까운 시점을 순차적으로 선택
+                # while available_indices:
+                #     current_pose = poses[sorted_indices[-1]]
+                #     distances = {idx: compute_pose_distance(current_pose, poses[idx]) 
+                #                 for idx in available_indices}
+                #     next_idx = min(distances.items(), key=lambda x: x[1])[0]
+                #     sorted_indices.append(next_idx)
+                #     available_indices.remove(next_idx)
                 while available_indices:
-                    current_pose = poses[sorted_indices[-1]]
-                    distances = {idx: compute_pose_distance(current_pose, poses[idx]) 
-                                for idx in available_indices}
-                    next_idx = min(distances.items(), key=lambda x: x[1])[0]
+                    # 가중치 계산
+                    weighted_distances = {}
+                    for candidate in available_indices:
+                        total = 0.0
+                        weight_sum = 0.0
+                        for k, prev_idx in enumerate(reversed(history_window)):
+                            weight = 0.5 ** (k+1)
+                            distance = compute_pose_distance(poses[prev_idx], poses[candidate])
+                            total += weight * distance
+                            weight_sum += weight
+                        weighted_distances[candidate] = total / weight_sum  # 정규화
+                    # 최소 가중 거리 선택
+                    next_idx = min(weighted_distances.items(), key=lambda x: x[1])[0]
+                    # 히스토리 업데이트
                     sorted_indices.append(next_idx)
                     available_indices.remove(next_idx)
+                    history_window.append(next_idx)
 
                 # 정렬된 인덱스를 뷰 ID로 변환
                 sorted_view_ids = [i_train_sorted_1_to_view_id[i] for i in sorted_indices]
+                # sorted_view_ids = sorted(
+                #     all_view_ids,
+                #     key=lambda x: self.Seg3d.confidences[view_id_to_index[x]],
+                #     reverse=True
+                # )
                 i_train_sorted = [view_id_to_index[view_id] for view_id in sorted_view_ids]
 
                 self.Seg3d.data_dict['i_train'] = i_train_sorted  # 학습 순서 갱신
-                logging.info(f"sorted_indices: {sorted_indices}")
-                logging.info(f"Initial view (highest confidence): {index_to_view_id[max_conf_idx]}")
-                logging.info(f"New training order: {sorted_view_ids}")
+                print(f"Selected Instance Confidence List: {self.Seg3d.confidences}")
+                print(f"Sorted Confidence Order: {[self.Seg3d.confidences[i] for i in sorted_indices]}")
+                print(f"sorted_indices: {sorted_indices}")
+                print(f"Initial view (highest confidence): {index_to_view_id[max_conf_idx]}")
+                print(f"New training order: {sorted_view_ids}")
                 
                 # render_poses, HW, Ks 갱신
                 self.Seg3d.update_render_poses()
@@ -494,7 +554,7 @@ class Sam3dGUI:
                 m = mask_img[(h2 - h) // 2 : (h2 + h) // 2, :]
 
                 # 마스크 이미지 저장
-                save_image(m, f'yolo_0.png')
+                # save_image(m, f'yolo_0.png')
                 masks = torch.zeros([c, h, w]).cpu().numpy()
                 masks[0:3, :, :] = m.type(torch.bool).cpu().numpy()
 
@@ -520,34 +580,34 @@ class Sam3dGUI:
 
                 # by seok get rendered mask
                 # 결과 마스크 계산 및 IoU 측정
-                f = open("iou.txt", "w")
-                avg_IoU = 0
-                render_poses, HW, Ks = sam3d.fetch_seg_poses(self.Seg3d.args.seg_poses, self.Seg3d.data_dict)
-                for idx in range(len(render_poses)):
-                    rgb, depth, bgmap, seg_m, dual_seg_m = self.Seg3d.render_view(idx, [render_poses, HW, Ks])
-                    tmp_rendered_mask = seg_m.detach().cpu().clone()
-                    tmp_rendered_mask[tmp_rendered_mask < 0] = 0
-                    tmp_rendered_mask[tmp_rendered_mask != 0] = 1
-                    # imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
+                # f = open("iou.txt", "w")
+                # avg_IoU = 0
+                # render_poses, HW, Ks = sam3d.fetch_seg_poses(self.Seg3d.args.seg_poses, self.Seg3d.data_dict)
+                # for idx in range(len(render_poses)):
+                #     rgb, depth, bgmap, seg_m, dual_seg_m = self.Seg3d.render_view(idx, [render_poses, HW, Ks])
+                #     tmp_rendered_mask = seg_m.detach().cpu().clone()
+                #     tmp_rendered_mask[tmp_rendered_mask < 0] = 0
+                #     tmp_rendered_mask[tmp_rendered_mask != 0] = 1
+                #     # imageio.imwrite(f"mask_rendered_{idx:02d}.png", tmp_rendered_mask)
 
-                    # Ground Truth 마스크 로드 및 IoU 계산
-                    tf = transforms.ToTensor()
-                    current_view_id = sorted_view_ids[idx]
-                    m = tf(PIL.Image.open(f'../Labeling/Set11/masks/{current_view_id:02d}_p5.png'))  # 수정
-                    m_numpy = m.cpu().numpy()
-                    if m_numpy.ndim == 3 and m_numpy.shape[0] == 1:  # 단일 채널 텐서
-                        m_numpy = m_numpy.squeeze(axis=0)  # 2D 배열로 변환
-                    elif m_numpy.ndim == 2:
-                        pass  # 이미 2D 배열
-                    else:
-                        raise ValueError("Input tensor has unsupported dimensions for saving.")
-                    imageio.imwrite(f"GT_sorted_{idx:02d}.png", m_numpy)
-                    tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
-                    avg_IoU += tmp_IoU
-                    f.write(f"{tmp_IoU}\n")
-                avg_IoU /= len(render_poses)
-                f.write(f"{avg_IoU}\n")
-                f.close()
+                #     # Ground Truth 마스크 로드 및 IoU 계산
+                #     tf = transforms.ToTensor()
+                #     current_view_id = sorted_view_ids[idx]
+                #     m = tf(PIL.Image.open(f'../Labeling/Set11/masks/{current_view_id:02d}_p5.png'))  # 수정
+                #     m_numpy = m.cpu().numpy()
+                #     if m_numpy.ndim == 3 and m_numpy.shape[0] == 1:  # 단일 채널 텐서
+                #         m_numpy = m_numpy.squeeze(axis=0)  # 2D 배열로 변환
+                #     elif m_numpy.ndim == 2:
+                #         pass  # 이미 2D 배열
+                #     else:
+                #         raise ValueError("Input tensor has unsupported dimensions for saving.")
+                #     imageio.imwrite(f"GT_sorted_{idx:02d}.png", m_numpy)
+                #     tmp_IoU = utils.cal_IoU(m.cpu(), tmp_rendered_mask.squeeze())
+                #     avg_IoU += tmp_IoU
+                #     f.write(f"{tmp_IoU}\n")
+                # avg_IoU /= len(render_poses)
+                # f.write(f"{avg_IoU}\n")
+                # f.close()
 
                 # 학습 결과를 반환
                 masked_rgb, seged_rgb = self.Seg3d.render_test()

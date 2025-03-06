@@ -31,7 +31,7 @@ class Sam3D(ABC):
         self.cfg = cfg
         self.args = args
         if args.mobile_sam:
-            from mobile_sam import sam_model_registry
+            from mobile_sam import sam_model_registry # type: ignore
 
             model_type = "vit_t"
             sam_checkpoint = "./dependencies/sam_ckpt/mobile_sam.pt"
@@ -208,35 +208,58 @@ class Sam3D(ABC):
         self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
                 
         if sam_mask is None:
-            # Rendered view를 SAM predictor에 업데이트
-            img = utils.to8b(rgb.cpu().numpy())
-            self.predictor.set_image(img)  # SAM 모델 이미지 업데이트
             img = self.data_dict['images'][self.data_dict['i_train'][idx],:,:,:].numpy()
             img = utils.to8b(img)
             h, w, c = img.shape
             results = model_yolo.predict(source=img, imgsz=(h,w), classes=0)
+            # 신뢰도 출력 추가--------------------------------
+            print(f"\n=== View {idx} ===")
+            print(f"Detected instances: {len(results[0].boxes)}")
+            for i, conf in enumerate(results[0].boxes.conf):
+                print(f"Instance {i}: Confidence={conf.item():.4f}")
+            #----------------------------------------------
             h2, w2 = results[0].masks.data[0].shape
             yolo_m = torch.zeros([h, w])
 
             iou = []
-            for j, img in enumerate(results[0].masks.data):
+            # for j, img in enumerate(results[0].masks.data):
 
+            #     tmp_seg_m = seg_m.cpu().squeeze()
+            #     tmp_rendered_mask = tmp_seg_m.detach().clone()
+            #     tmp_rendered_mask[torch.logical_or(tmp_rendered_mask <= tmp_rendered_mask.mean(), tmp_rendered_mask <= 0)] = 0
+            #     tmp_rendered_mask[tmp_rendered_mask != 0] = 1
+            #     tmp_IoU = utils.cal_IoU(img[(h2-h)//2:(h2+h)//2,:].cpu(), tmp_rendered_mask)    
+            #     iou.append(tmp_IoU)
+
+            confidences = []
+            for j, (mask, box) in enumerate(zip(results[0].masks.data, results[0].boxes)):
+                # 마스크 정렬
                 tmp_seg_m = seg_m.cpu().squeeze()
+                aligned_mask = mask[(h2-h)//2:(h2+h)//2,:].cpu()
                 tmp_rendered_mask = tmp_seg_m.detach().clone()
                 tmp_rendered_mask[torch.logical_or(tmp_rendered_mask <= tmp_rendered_mask.mean(), tmp_rendered_mask <= 0)] = 0
                 tmp_rendered_mask[tmp_rendered_mask != 0] = 1
-                tmp_IoU = utils.cal_IoU(img[(h2-h)//2:(h2+h)//2,:].cpu(), tmp_rendered_mask)    
+                # IoU 계산
+                tmp_IoU = utils.cal_IoU(aligned_mask, tmp_rendered_mask)
                 iou.append(tmp_IoU)
+                confidences.append(box.conf.item())
+            # 종합 점수 계산
+            combined_scores = [iou[i]*0.6 + confidences[i]*0.4 for i in range(len(iou))]
+            best_idx = combined_scores.index(max(combined_scores))
 
             # if iou.index(max(iou)) > 0.1:
             yolo_m = results[0].masks.data[iou.index(max(iou))][(h2-h)//2:(h2+h)//2,:]
             # save yolo result for max iou
-            save_image(yolo_m, f'yolo_{idx}.png')
+            # save_image(yolo_m, f'yolo_{idx}.png')
 
             # save confidence
             if self.vsgflag == False:
-                self.confidences.append(results[0].boxes.conf[iou.index(max(iou))])
-                self.idx_selected[self.data_dict['i_train'][idx]] = iou.index(max(iou))
+                # self.confidences.append(results[0].boxes.conf[iou.index(max(iou))])
+                # self.idx_selected[self.data_dict['i_train'][idx]] = iou.index(max(iou))
+                # self.confidences.append(results[0].boxes.conf[best_idx])
+                self.confidences.append(combined_scores[best_idx])
+                self.idx_selected[self.data_dict['i_train'][idx]] = best_idx
+                print(f"Selected instance: {iou.index(max(iou))} (Confidence: {results[0].boxes.conf[iou.index(max(iou))]:.4f})")
 
             sam_seg_show = self.prompt_and_inverse(idx, HW, seg_m, yolo_m, dual_seg_m, depth)
 

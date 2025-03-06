@@ -27,16 +27,15 @@ pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --e
 
 Install SAM:
 ```bash
-mkdir dependencies; cd dependencies
-git clone https://github.com/facebookresearch/segment-anything.git 
-cd segment-anything; pip install -e .
+mkdir dependencies; cd dependencies 
 mkdir sam_ckpt; cd sam_ckpt
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+git clone git@github.com:facebookresearch/segment-anything.git 
+cd segment-anything; pip install -e .
 ```
 
 Installing Grounding-DINO
 ```bash
-cd ..
 git clone https://github.com/IDEA-Research/GroundingDINO.git
 cd GroundingDINO/; pip install -e .
 mkdir weights; cd weights
@@ -44,9 +43,6 @@ wget https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alp
 ```
 
 ## Prepare Data
-
-이곳에서 데이터, 라벨링 GT, YOLO pt 파일을 다운로드 받을 수 있습니다. 
-https://drive.google.com/drive/folders/1WeVuaVRklUjtP9QMRl5RY5P26Rf9Lx22?usp=drive_link
 
 data 파일은 압축을 해제하여 SA3D_YOLO에 세팅 \
 YOLO pt파일은 다운받아 SA3D_YOLO에 위치 \

@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./dependencies/sam_ckpt/segment-anything"
+    ]
+}

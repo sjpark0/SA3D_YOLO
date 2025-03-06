@@ -1,0 +1,1447 @@
+Using /home/lab/.cache/torch_extensions/py310_cu116 as PyTorch extensions root...
+Detected CUDA files, patching ldflags
+Emitting ninja build file /home/lab/.cache/torch_extensions/py310_cu116/render_utils_cuda/build.ninja...
+Building extension module render_utils_cuda...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module render_utils_cuda...
+Using /home/lab/.cache/torch_extensions/py310_cu116 as PyTorch extensions root...
+Detected CUDA files, patching ldflags
+Emitting ninja build file /home/lab/.cache/torch_extensions/py310_cu116/total_variation_cuda/build.ninja...
+Building extension module total_variation_cuda...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module total_variation_cuda...
+Using /home/lab/.cache/torch_extensions/py310_cu116 as PyTorch extensions root...
+No modifications detected for re-loaded extension module render_utils_cuda, skipping build step...
+Loading extension module render_utils_cuda...
+Using /home/lab/.cache/torch_extensions/py310_cu116 as PyTorch extensions root...
+No modifications detected for re-loaded extension module render_utils_cuda, skipping build step...
+Loading extension module render_utils_cuda...
+Using /home/lab/.cache/torch_extensions/py310_cu116 as PyTorch extensions root...
+Detected CUDA files, patching ldflags
+Emitting ninja build file /home/lab/.cache/torch_extensions/py310_cu116/ub360_utils_cuda/build.ninja...
+Building extension module ub360_utils_cuda...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module ub360_utils_cuda...
+Using /home/lab/.cache/torch_extensions/py310_cu116 as PyTorch extensions root...
+Detected CUDA files, patching ldflags
+Emitting ninja build file /home/lab/.cache/torch_extensions/py310_cu116/adam_upd_cuda/build.ninja...
+Building extension module adam_upd_cuda...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module adam_upd_cuda...
+UserWarning: Pandas requires version '2.8.4' or newer of 'numexpr' (version '2.7.3' currently installed).
+Loading images from ./data/360_v2/Set10/images_4
+100%|███████████████████████████████████████████| 32/32 [00:00<00:00, 35.06it/s]
+Loaded image data (540, 960, 3, 32) [        540         960       755.4]
+Loaded ./data/360_v2/Set10 1.0377994298596556 56.06785458628859
+Data:
+(32, 3, 5) (32, 540, 960, 3) (32, 2)
+HOLDOUT view is 23
+Loaded llff (32, 540, 960, 3) torch.Size([200, 3, 5]) [        540         960       755.4] ./data/360_v2/Set10
+Auto LLFF holdout, 8
+DEFINING BOUNDS
+near_clip 0.213833025097847
+original far 12.836090087890625
+NEAR FAR 0 2.2574854
+train: start
+compute_bbox_by_cam_frustrm: start
+UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  /opt/conda/conda-bld/pytorch_1659484803030/work/aten/src/ATen/native/TensorShape.cpp:2894.)
+compute_bbox_by_cam_frustrm: xyz_min tensor([-1.1254, -0.9728, -0.8908])
+compute_bbox_by_cam_frustrm: xyz_max tensor([0.7559, 0.9084, 0.9904])
+compute_bbox_by_cam_frustrm: finish
+SAM initializd.
+scene_rep_reconstruction (coarse): reload from ./logs/nerf_unbounded/dcvgo_Set10_unbounded/fine_last.tar
+Load model with num_objects = 1
+dcvgo: voxel_size       tensor(0.0075)
+dcvgo: world_size       tensor([320, 320, 320])
+dcvgo: voxel_size_base  tensor(0.0150)
+dcvgo: voxel_size_ratio tensor(0.5000)
+dcvgo: set density bias shift to tensor([-9.2102], device='cpu')
+tensor([-1.2000, -1.2000, -1.2000]) tensor([1.2000, 1.2000, 1.2000]) tensor([320, 320, 320])
+tensor([-1.2000, -1.2000, -1.2000]) tensor([1.2000, 1.2000, 1.2000]) tensor([320, 320, 320])
+tensor([-1.2000, -1.2000, -1.2000]) tensor([1.2000, 1.2000, 1.2000]) tensor([320, 320, 320])
+dcvgo: feature voxel grid TensoRFGrid(channels=12, world_size=[320, 320, 320], n_comp=48)
+dcvgo: mlp Sequential(
+  (0): Linear(in_features=39, out_features=128, bias=True)
+  (1): ReLU(inplace=True)
+  (2): Sequential(
+    (0): Linear(in_features=128, out_features=128, bias=True)
+    (1): ReLU(inplace=True)
+  )
+  (3): Linear(in_features=128, out_features=3, bias=True)
+)
+NeRF loaded with msg:  _IncompatibleKeys(missing_keys=['seg_mask_grid.grid', 'seg_mask_grid.xyz_min', 'seg_mask_grid.xyz_max', 'dual_seg_mask_grid.grid', 'dual_seg_mask_grid.xyz_min', 'dual_seg_mask_grid.xyz_max'], unexpected_keys=[])
+create_optimizer_or_freeze_model: param seg_mask_grid lr 1.0
+create_optimizer_or_freeze_model: param dual_seg_mask_grid lr 1.0
+create_optimizer_or_freeze_model: param density freeze
+create_optimizer_or_freeze_model: param k0 freeze
+create_optimizer_or_freeze_model: param rgbnet freeze
+NeRF loaded with msg:  _IncompatibleKeys(missing_keys=['seg_mask_grid.grid', 'seg_mask_grid.xyz_min', 'seg_mask_grid.xyz_max', 'dual_seg_mask_grid.grid', 'dual_seg_mask_grid.xyz_min', 'dual_seg_mask_grid.xyz_max'], unexpected_keys=[])
+Segmentation model: COARSE MODE.
+create_optimizer_or_freeze_model: param seg_mask_grid lr 1
+create_optimizer_or_freeze_model: param dual_seg_mask_grid lr 1
+create_optimizer_or_freeze_model: param density freeze
+create_optimizer_or_freeze_model: param k0 freeze
+create_optimizer_or_freeze_model: param rgbnet freeze
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.2ms
+Speed: 2.7ms preprocess, 20.2ms inference, 2.2ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.4ms
+Speed: 1.3ms preprocess, 20.4ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 20.6ms
+Speed: 1.3ms preprocess, 20.6ms inference, 1.9ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 20.6ms
+Speed: 1.2ms preprocess, 20.6ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.0ms
+Speed: 1.2ms preprocess, 20.0ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.1ms
+Speed: 1.2ms preprocess, 20.1ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 4 persons, 20.0ms
+Speed: 1.2ms preprocess, 20.0ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.4ms
+Speed: 1.2ms preprocess, 20.4ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 20.3ms
+Speed: 1.2ms preprocess, 20.3ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.7ms
+Speed: 1.2ms preprocess, 20.7ms inference, 0.9ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 9 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.1ms
+Speed: 1.5ms preprocess, 20.1ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 20.7ms
+Speed: 1.2ms preprocess, 20.7ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.6ms
+Speed: 1.2ms preprocess, 20.6ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.3ms
+Speed: 1.2ms preprocess, 20.3ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 21.1ms
+Speed: 1.2ms preprocess, 21.1ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.3ms
+Speed: 1.2ms preprocess, 20.3ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 20.4ms
+Speed: 1.2ms preprocess, 20.4ms inference, 2.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.4ms
+Speed: 1.2ms preprocess, 20.4ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 20.0ms
+Speed: 1.2ms preprocess, 20.0ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.8ms
+Speed: 1.2ms preprocess, 20.8ms inference, 1.0ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 20.4ms
+Speed: 1.2ms preprocess, 20.4ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.1ms
+Speed: 1.2ms preprocess, 20.1ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.9ms
+Speed: 1.2ms preprocess, 20.9ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 20.3ms
+Speed: 1.2ms preprocess, 20.3ms inference, 0.9ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.1ms
+Speed: 1.2ms preprocess, 20.1ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 20.2ms
+Speed: 1.2ms preprocess, 20.2ms inference, 0.9ms postprocess per image at shape (1, 3, 544, 960)
+Dash is running on http://127.0.0.1:8050/
+
+INFO:lib.gui:Dash is running on http://127.0.0.1:8050/
+
+ * Serving Flask app 'lib.gui' (lazy loading)
+ * Environment: production
+[31m   WARNING: This is a development server. Do not use it in a production deployment.[0m
+[2m   Use a production WSGI server instead.[0m
+ * Debug mode: off
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 9 persons, 24.3ms
+Speed: 12.0ms preprocess, 24.3ms inference, 2.9ms postprocess per image at shape (1, 3, 544, 960)
+valid_views: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+best_view_idx: 12
+view_order: [13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 20.7ms
+Speed: 1.3ms preprocess, 20.7ms inference, 2.0ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 1 ===
+Detected instances: 6
+Instance 0: Confidence=0.9428
+Instance 1: Confidence=0.9198
+Instance 2: Confidence=0.8951
+Instance 3: Confidence=0.8149
+Instance 4: Confidence=0.7098
+Instance 5: Confidence=0.4333
+Selected instance: 4 (Confidence: 0.7098)
+tmp min: tensor(0.) tmp max: tensor(1.)
+/home/lab/SA3D_YOLO/lib/self_prompting.py:32: UserWarning:
+
+__floordiv__ is deprecated, and its behavior will change in a future version of pytorch. It currently rounds toward 0 (like the 'trunc' function NOT 'floor'). This results in incorrect rounding for negative values. To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor').
+
+/home/lab/SA3D_YOLO/lib/self_prompting.py:34: UserWarning:
+
+__floordiv__ is deprecated, and its behavior will change in a future version of pytorch. It currently rounds toward 0 (like the 'trunc' function NOT 'floor'). This results in incorrect rounding for negative values. To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor').
+
+381 80 540 960
+/home/lab/SA3D_YOLO/lib/self_prompting.py:88: UserWarning:
+
+__floordiv__ is deprecated, and its behavior will change in a future version of pytorch. It currently rounds toward 0 (like the 'trunc' function NOT 'floor'). This results in incorrect rounding for negative values. To keep the current behavior, use torch.div(a, b, rounding_mode='trunc'), or for actual floor division, use torch.div(a, b, rounding_mode='floor').
+
+There are 13 prompts
+current IoU is: 0.26824501156806946
+Seok, iteration idx= 1 IoU = tensor(0.2682)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 22.2ms
+Speed: 3.4ms preprocess, 22.2ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 2 ===
+Detected instances: 8
+Instance 0: Confidence=0.9484
+Instance 1: Confidence=0.9271
+Instance 2: Confidence=0.9025
+Instance 3: Confidence=0.7065
+Instance 4: Confidence=0.5530
+Instance 5: Confidence=0.4350
+Instance 6: Confidence=0.2934
+Instance 7: Confidence=0.2923
+Selected instance: 2 (Confidence: 0.9025)
+tmp min: tensor(0.) tmp max: tensor(1.)
+340 80 540 960
+There are 17 prompts
+current IoU is: 0.0024289623834192753
+Seok, iteration idx= 2 IoU = tensor(0.0024)
+SKIP, unacceptable sam prediction, IoU is tensor(0.0024)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.0ms
+Speed: 2.3ms preprocess, 22.0ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 3 ===
+Detected instances: 5
+Instance 0: Confidence=0.9401
+Instance 1: Confidence=0.9317
+Instance 2: Confidence=0.9104
+Instance 3: Confidence=0.7368
+Instance 4: Confidence=0.3522
+Selected instance: 4 (Confidence: 0.3522)
+tmp min: tensor(0.) tmp max: tensor(1.)
+435 132 540 960
+There are 11 prompts
+current IoU is: 0.18957054615020752
+Seok, iteration idx= 3 IoU = tensor(0.1896)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1896)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.2ms
+Speed: 3.1ms preprocess, 22.2ms inference, 2.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 4 ===
+Detected instances: 6
+Instance 0: Confidence=0.9338
+Instance 1: Confidence=0.9123
+Instance 2: Confidence=0.8407
+Instance 3: Confidence=0.4946
+Instance 4: Confidence=0.4087
+Instance 5: Confidence=0.3586
+Selected instance: 0 (Confidence: 0.9338)
+tmp min: tensor(0.) tmp max: tensor(1.)
+620 32 540 960
+There are 14 prompts
+current IoU is: 0.1650758683681488
+Seok, iteration idx= 4 IoU = tensor(0.1651)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1651)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 21.7ms
+Speed: 3.1ms preprocess, 21.7ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 5 ===
+Detected instances: 5
+Instance 0: Confidence=0.9435
+Instance 1: Confidence=0.9302
+Instance 2: Confidence=0.8207
+Instance 3: Confidence=0.7721
+Instance 4: Confidence=0.7155
+Selected instance: 1 (Confidence: 0.9302)
+tmp min: tensor(0.) tmp max: tensor(1.)
+551 40 540 960
+There are 13 prompts
+current IoU is: 0.16976219415664673
+Seok, iteration idx= 5 IoU = tensor(0.1698)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1698)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 21.9ms
+Speed: 3.0ms preprocess, 21.9ms inference, 1.4ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 6 ===
+Detected instances: 5
+Instance 0: Confidence=0.9373
+Instance 1: Confidence=0.9227
+Instance 2: Confidence=0.8916
+Instance 3: Confidence=0.8082
+Instance 4: Confidence=0.3235
+Selected instance: 1 (Confidence: 0.9227)
+tmp min: tensor(0.) tmp max: tensor(1.)
+542 76 540 960
+There are 14 prompts
+current IoU is: 0.1543988138437271
+Seok, iteration idx= 6 IoU = tensor(0.1544)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1544)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 23.7ms
+Speed: 1.2ms preprocess, 23.7ms inference, 3.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 7 ===
+Detected instances: 7
+Instance 0: Confidence=0.9313
+Instance 1: Confidence=0.8929
+Instance 2: Confidence=0.8629
+Instance 3: Confidence=0.8365
+Instance 4: Confidence=0.7943
+Instance 5: Confidence=0.7689
+Instance 6: Confidence=0.3691
+Selected instance: 0 (Confidence: 0.9313)
+tmp min: tensor(0.) tmp max: tensor(1.)
+500 36 540 960
+There are 16 prompts
+current IoU is: 0.1256491243839264
+Seok, iteration idx= 7 IoU = tensor(0.1256)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1256)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 21.9ms
+Speed: 1.2ms preprocess, 21.9ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 8 ===
+Detected instances: 5
+Instance 0: Confidence=0.9403
+Instance 1: Confidence=0.9039
+Instance 2: Confidence=0.8857
+Instance 3: Confidence=0.8587
+Instance 4: Confidence=0.7733
+Selected instance: 0 (Confidence: 0.9403)
+tmp min: tensor(0.) tmp max: tensor(1.)
+433 36 540 960
+There are 13 prompts
+current IoU is: 0.12338584661483765
+Seok, iteration idx= 8 IoU = tensor(0.1234)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1234)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 22.0ms
+Speed: 1.4ms preprocess, 22.0ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 9 ===
+Detected instances: 8
+Instance 0: Confidence=0.9461
+Instance 1: Confidence=0.9275
+Instance 2: Confidence=0.9187
+Instance 3: Confidence=0.7332
+Instance 4: Confidence=0.5451
+Instance 5: Confidence=0.3224
+Instance 6: Confidence=0.3072
+Instance 7: Confidence=0.2709
+Selected instance: 0 (Confidence: 0.9461)
+tmp min: tensor(0.) tmp max: tensor(1.)
+385 12 540 960
+There are 12 prompts
+current IoU is: 0.1425509750843048
+Seok, iteration idx= 9 IoU = tensor(0.1426)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1426)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.0ms
+Speed: 1.2ms preprocess, 22.0ms inference, 2.4ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 10 ===
+Detected instances: 6
+Instance 0: Confidence=0.9510
+Instance 1: Confidence=0.9400
+Instance 2: Confidence=0.8922
+Instance 3: Confidence=0.7839
+Instance 4: Confidence=0.7346
+Instance 5: Confidence=0.6675
+Selected instance: 0 (Confidence: 0.9510)
+tmp min: tensor(0.) tmp max: tensor(1.)
+323 20 540 960
+There are 15 prompts
+current IoU is: 0.1612984985113144
+Seok, iteration idx= 10 IoU = tensor(0.1613)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1613)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.4ms
+Speed: 1.3ms preprocess, 22.4ms inference, 1.9ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 11 ===
+Detected instances: 5
+Instance 0: Confidence=0.9489
+Instance 1: Confidence=0.9128
+Instance 2: Confidence=0.8616
+Instance 3: Confidence=0.7378
+Instance 4: Confidence=0.4551
+Selected instance: 1 (Confidence: 0.9128)
+tmp min: tensor(0.) tmp max: tensor(1.)
+308 12 540 960
+There are 15 prompts
+current IoU is: 0.1857670098543167
+Seok, iteration idx= 11 IoU = tensor(0.1858)
+SKIP, unacceptable sam prediction, IoU is tensor(0.1858)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 23.2ms
+Speed: 1.3ms preprocess, 23.2ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 12 ===
+Detected instances: 5
+Instance 0: Confidence=0.9553
+Instance 1: Confidence=0.9348
+Instance 2: Confidence=0.8795
+Instance 3: Confidence=0.5983
+Instance 4: Confidence=0.4742
+Selected instance: 1 (Confidence: 0.9348)
+tmp min: tensor(0.) tmp max: tensor(1.)
+296 0 540 960
+There are 13 prompts
+current IoU is: 0.2330058068037033
+Seok, iteration idx= 12 IoU = tensor(0.2330)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 23.6ms
+Speed: 1.2ms preprocess, 23.6ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 13 ===
+Detected instances: 8
+Instance 0: Confidence=0.9589
+Instance 1: Confidence=0.9509
+Instance 2: Confidence=0.8897
+Instance 3: Confidence=0.8221
+Instance 4: Confidence=0.7976
+Instance 5: Confidence=0.7491
+Instance 6: Confidence=0.3801
+Instance 7: Confidence=0.2839
+Selected instance: 1 (Confidence: 0.9509)
+tmp min: tensor(0.) tmp max: tensor(1.)
+270 44 540 960
+There are 15 prompts
+current IoU is: 0.8555818796157837
+Seok, iteration idx= 13 IoU = tensor(0.8556)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.6ms
+Speed: 1.5ms preprocess, 22.6ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 14 ===
+Detected instances: 6
+Instance 0: Confidence=0.9545
+Instance 1: Confidence=0.9200
+Instance 2: Confidence=0.8959
+Instance 3: Confidence=0.8240
+Instance 4: Confidence=0.8171
+Instance 5: Confidence=0.3278
+Selected instance: 1 (Confidence: 0.9200)
+tmp min: tensor(0.) tmp max: tensor(1.)
+257 16 540 960
+There are 17 prompts
+current IoU is: 0.8941087126731873
+Seok, iteration idx= 14 IoU = tensor(0.8941)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.2ms
+Speed: 1.2ms preprocess, 22.2ms inference, 1.8ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 15 ===
+Detected instances: 5
+Instance 0: Confidence=0.9534
+Instance 1: Confidence=0.9170
+Instance 2: Confidence=0.9081
+Instance 3: Confidence=0.7840
+Instance 4: Confidence=0.7586
+Selected instance: 2 (Confidence: 0.9081)
+tmp min: tensor(0.) tmp max: tensor(1.)
+262 36 540 960
+There are 17 prompts
+current IoU is: 0.9061517715454102
+Seok, iteration idx= 15 IoU = tensor(0.9062)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.4ms
+Speed: 1.3ms preprocess, 22.4ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 16 ===
+Detected instances: 6
+Instance 0: Confidence=0.9436
+Instance 1: Confidence=0.9128
+Instance 2: Confidence=0.9021
+Instance 3: Confidence=0.7538
+Instance 4: Confidence=0.6958
+Instance 5: Confidence=0.4477
+Selected instance: 1 (Confidence: 0.9128)
+tmp min: tensor(0.) tmp max: tensor(1.)
+266 120 540 960
+There are 17 prompts
+current IoU is: 0.877936065196991
+Seok, iteration idx= 16 IoU = tensor(0.8779)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.1ms
+Speed: 1.3ms preprocess, 22.1ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 17 ===
+Detected instances: 5
+Instance 0: Confidence=0.9358
+Instance 1: Confidence=0.9349
+Instance 2: Confidence=0.8948
+Instance 3: Confidence=0.8225
+Instance 4: Confidence=0.7823
+Selected instance: 2 (Confidence: 0.8948)
+tmp min: tensor(0.) tmp max: tensor(1.)
+269 92 540 960
+There are 17 prompts
+current IoU is: 0.8430646657943726
+Seok, iteration idx= 17 IoU = tensor(0.8431)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.3ms
+Speed: 1.2ms preprocess, 22.3ms inference, 1.9ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 18 ===
+Detected instances: 6
+Instance 0: Confidence=0.9343
+Instance 1: Confidence=0.9156
+Instance 2: Confidence=0.8866
+Instance 3: Confidence=0.8747
+Instance 4: Confidence=0.7347
+Instance 5: Confidence=0.5717
+Selected instance: 2 (Confidence: 0.8866)
+tmp min: tensor(0.) tmp max: tensor(1.)
+264 100 540 960
+There are 17 prompts
+current IoU is: 0.8724250197410583
+Seok, iteration idx= 18 IoU = tensor(0.8724)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 23.4ms
+Speed: 1.3ms preprocess, 23.4ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 19 ===
+Detected instances: 7
+Instance 0: Confidence=0.9486
+Instance 1: Confidence=0.9327
+Instance 2: Confidence=0.8889
+Instance 3: Confidence=0.8410
+Instance 4: Confidence=0.7670
+Instance 5: Confidence=0.3930
+Instance 6: Confidence=0.3173
+Selected instance: 3 (Confidence: 0.8410)
+tmp min: tensor(0.) tmp max: tensor(1.)
+271 68 540 960
+There are 14 prompts
+current IoU is: 0.8201779723167419
+Seok, iteration idx= 19 IoU = tensor(0.8202)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.1ms
+Speed: 1.3ms preprocess, 22.1ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 20 ===
+Detected instances: 6
+Instance 0: Confidence=0.9357
+Instance 1: Confidence=0.9320
+Instance 2: Confidence=0.8987
+Instance 3: Confidence=0.8981
+Instance 4: Confidence=0.8441
+Instance 5: Confidence=0.7465
+Selected instance: 3 (Confidence: 0.8981)
+tmp min: tensor(0.) tmp max: tensor(1.)
+635 92 540 960
+There are 19 prompts
+current IoU is: 0.5539770126342773
+Seok, iteration idx= 20 IoU = tensor(0.5540)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 24.0ms
+Speed: 1.5ms preprocess, 24.0ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 21 ===
+Detected instances: 6
+Instance 0: Confidence=0.9505
+Instance 1: Confidence=0.9323
+Instance 2: Confidence=0.8850
+Instance 3: Confidence=0.8476
+Instance 4: Confidence=0.6034
+Instance 5: Confidence=0.3047
+Selected instance: 3 (Confidence: 0.8476)
+tmp min: tensor(0.) tmp max: tensor(1.)
+663 64 540 960
+There are 17 prompts
+current IoU is: 0.788164496421814
+Seok, iteration idx= 21 IoU = tensor(0.7882)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 23.1ms
+Speed: 1.3ms preprocess, 23.1ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 22 ===
+Detected instances: 7
+Instance 0: Confidence=0.9535
+Instance 1: Confidence=0.9077
+Instance 2: Confidence=0.8941
+Instance 3: Confidence=0.7788
+Instance 4: Confidence=0.7653
+Instance 5: Confidence=0.6566
+Instance 6: Confidence=0.4216
+Selected instance: 2 (Confidence: 0.8941)
+tmp min: tensor(0.) tmp max: tensor(1.)
+687 52 540 960
+There are 17 prompts
+current IoU is: 0.8085649013519287
+Seok, iteration idx= 22 IoU = tensor(0.8086)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 22.6ms
+Speed: 1.5ms preprocess, 22.6ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 23 ===
+Detected instances: 7
+Instance 0: Confidence=0.9425
+Instance 1: Confidence=0.9028
+Instance 2: Confidence=0.8830
+Instance 3: Confidence=0.8673
+Instance 4: Confidence=0.8513
+Instance 5: Confidence=0.6991
+Instance 6: Confidence=0.4623
+Selected instance: 3 (Confidence: 0.8673)
+tmp min: tensor(0.) tmp max: tensor(1.)
+659 48 540 960
+There are 16 prompts
+current IoU is: 0.8543128967285156
+Seok, iteration idx= 23 IoU = tensor(0.8543)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.9ms
+Speed: 1.4ms preprocess, 22.9ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 24 ===
+Detected instances: 6
+Instance 0: Confidence=0.9449
+Instance 1: Confidence=0.9317
+Instance 2: Confidence=0.9027
+Instance 3: Confidence=0.8698
+Instance 4: Confidence=0.7552
+Instance 5: Confidence=0.5370
+Selected instance: 3 (Confidence: 0.8698)
+tmp min: tensor(0.) tmp max: tensor(1.)
+668 28 540 960
+There are 18 prompts
+current IoU is: 0.8825750350952148
+Seok, iteration idx= 24 IoU = tensor(0.8826)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.9ms
+Speed: 1.3ms preprocess, 22.9ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 25 ===
+Detected instances: 5
+Instance 0: Confidence=0.9483
+Instance 1: Confidence=0.9103
+Instance 2: Confidence=0.9077
+Instance 3: Confidence=0.8864
+Instance 4: Confidence=0.3265
+Selected instance: 2 (Confidence: 0.9077)
+tmp min: tensor(0.) tmp max: tensor(1.)
+688 20 540 960
+There are 15 prompts
+current IoU is: 0.8976802229881287
+Seok, iteration idx= 25 IoU = tensor(0.8977)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 24.1ms
+Speed: 1.3ms preprocess, 24.1ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 26 ===
+Detected instances: 5
+Instance 0: Confidence=0.9350
+Instance 1: Confidence=0.9340
+Instance 2: Confidence=0.8964
+Instance 3: Confidence=0.8023
+Instance 4: Confidence=0.4329
+Selected instance: 1 (Confidence: 0.9340)
+tmp min: tensor(0.) tmp max: tensor(1.)
+649 12 540 960
+There are 16 prompts
+current IoU is: 0.9124778509140015
+Seok, iteration idx= 26 IoU = tensor(0.9125)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 4 persons, 22.3ms
+Speed: 1.3ms preprocess, 22.3ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 27 ===
+Detected instances: 4
+Instance 0: Confidence=0.9348
+Instance 1: Confidence=0.9073
+Instance 2: Confidence=0.9057
+Instance 3: Confidence=0.7642
+Selected instance: 0 (Confidence: 0.9348)
+tmp min: tensor(0.) tmp max: tensor(1.)
+606 0 540 960
+There are 15 prompts
+current IoU is: 0.916346549987793
+Seok, iteration idx= 27 IoU = tensor(0.9163)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.8ms
+Speed: 2.5ms preprocess, 22.8ms inference, 1.8ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 28 ===
+Detected instances: 6
+Instance 0: Confidence=0.9387
+Instance 1: Confidence=0.9300
+Instance 2: Confidence=0.9169
+Instance 3: Confidence=0.6203
+Instance 4: Confidence=0.5186
+Instance 5: Confidence=0.2775
+Selected instance: 3 (Confidence: 0.6203)
+tmp min: tensor(0.) tmp max: tensor(1.)
+294 52 540 960
+There are 12 prompts
+current IoU is: 0.2735006511211395
+Seok, iteration idx= 28 IoU = tensor(0.2735)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 23.8ms
+Speed: 1.2ms preprocess, 23.8ms inference, 1.8ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 29 ===
+Detected instances: 8
+Instance 0: Confidence=0.9445
+Instance 1: Confidence=0.9200
+Instance 2: Confidence=0.9052
+Instance 3: Confidence=0.5757
+Instance 4: Confidence=0.3700
+Instance 5: Confidence=0.3422
+Instance 6: Confidence=0.3060
+Instance 7: Confidence=0.2816
+Selected instance: 5 (Confidence: 0.3422)
+tmp min: tensor(0.) tmp max: tensor(1.)
+293 56 540 960
+There are 11 prompts
+current IoU is: 0.3589009642601013
+Seok, iteration idx= 29 IoU = tensor(0.3589)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 23.1ms
+Speed: 1.3ms preprocess, 23.1ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 30 ===
+Detected instances: 5
+Instance 0: Confidence=0.9583
+Instance 1: Confidence=0.9051
+Instance 2: Confidence=0.9033
+Instance 3: Confidence=0.8099
+Instance 4: Confidence=0.2907
+Selected instance: 2 (Confidence: 0.9033)
+tmp min: tensor(0.) tmp max: tensor(1.)
+325 20 540 960
+There are 15 prompts
+current IoU is: 0.03874887898564339
+Seok, iteration idx= 30 IoU = tensor(0.0387)
+SKIP, unacceptable sam prediction, IoU is tensor(0.0387)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.3ms
+Speed: 1.4ms preprocess, 23.3ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 31 ===
+Detected instances: 6
+Instance 0: Confidence=0.9487
+Instance 1: Confidence=0.9292
+Instance 2: Confidence=0.8816
+Instance 3: Confidence=0.8691
+Instance 4: Confidence=0.7868
+Instance 5: Confidence=0.2647
+Selected instance: 4 (Confidence: 0.7868)
+tmp min: tensor(0.) tmp max: tensor(1.)
+354 84 540 960
+There are 17 prompts
+current IoU is: 0.7194471955299377
+Seok, iteration idx= 31 IoU = tensor(0.7194)
+Selected Instance Confidence List: [tensor(0.7854), tensor(0.4449, device='cpu'), tensor(0.3799, device='cpu'), tensor(0.3761, device='cpu'), tensor(0.4726, device='cpu'), tensor(0.4739, device='cpu'), tensor(0.4617, device='cpu'), tensor(0.4479, device='cpu'), tensor(0.4501, device='cpu'), tensor(0.4640, device='cpu'), tensor(0.4772, device='cpu'), tensor(0.4766, device='cpu'), tensor(0.5137, device='cpu'), tensor(0.8937, device='cpu'), tensor(0.9045, device='cpu'), tensor(0.9069, device='cpu'), tensor(0.8919, device='cpu'), tensor(0.8637, device='cpu'), tensor(0.8781, device='cpu'), tensor(0.8285, device='cpu'), tensor(0.6916, device='cpu'), tensor(0.8120, device='cpu'), tensor(0.8428, device='cpu'), tensor(0.8595, device='cpu'), tensor(0.8775, device='cpu'), tensor(0.9017, device='cpu'), tensor(0.9211, device='cpu'), tensor(0.9237, device='cpu'), tensor(0.4122, device='cpu'), tensor(0.3778, device='cpu'), tensor(0.3846, device='cpu'), tensor(0.7464, device='cpu')]
+Sorted Confidence Order: [tensor(0.9237, device='cpu'), tensor(0.9211, device='cpu'), tensor(0.9017, device='cpu'), tensor(0.8775, device='cpu'), tensor(0.8595, device='cpu'), tensor(0.8428, device='cpu'), tensor(0.8120, device='cpu'), tensor(0.6916, device='cpu'), tensor(0.4726, device='cpu'), tensor(0.4739, device='cpu'), tensor(0.4617, device='cpu'), tensor(0.4479, device='cpu'), tensor(0.4501, device='cpu'), tensor(0.4640, device='cpu'), tensor(0.4772, device='cpu'), tensor(0.4766, device='cpu'), tensor(0.5137, device='cpu'), tensor(0.8937, device='cpu'), tensor(0.9045, device='cpu'), tensor(0.9069, device='cpu'), tensor(0.8919, device='cpu'), tensor(0.8637, device='cpu'), tensor(0.8781, device='cpu'), tensor(0.8285, device='cpu'), tensor(0.4122, device='cpu'), tensor(0.3778, device='cpu'), tensor(0.3846, device='cpu'), tensor(0.7464, device='cpu'), tensor(0.7854), tensor(0.4449, device='cpu'), tensor(0.3799, device='cpu'), tensor(0.3761, device='cpu')]
+sorted_indices: [27, 26, 25, 24, 23, 22, 21, 20, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 28, 29, 30, 31, 0, 1, 2, 3]
+Initial view (highest confidence): 32
+New training order: [8, 7, 6, 5, 4, 3, 2, 1, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 9, 10, 11, 12, 13, 14, 15, 16]
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 4 persons, 21.1ms
+Speed: 1.3ms preprocess, 21.1ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.2ms
+Speed: 1.3ms preprocess, 22.2ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 1 ===
+Detected instances: 5
+Instance 0: Confidence=0.9350
+Instance 1: Confidence=0.9340
+Instance 2: Confidence=0.8964
+Instance 3: Confidence=0.8023
+Instance 4: Confidence=0.4329
+tmp min: tensor(0.) tmp max: tensor(1.)
+649 12 540 960
+There are 16 prompts
+current IoU is: 0.9288484454154968
+Seok, iteration idx= 1 IoU = tensor(0.9288)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 23.1ms
+Speed: 1.5ms preprocess, 23.1ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 2 ===
+Detected instances: 5
+Instance 0: Confidence=0.9483
+Instance 1: Confidence=0.9103
+Instance 2: Confidence=0.9077
+Instance 3: Confidence=0.8864
+Instance 4: Confidence=0.3265
+tmp min: tensor(0.) tmp max: tensor(1.)
+688 20 540 960
+There are 15 prompts
+current IoU is: 0.9545076489448547
+Seok, iteration idx= 2 IoU = tensor(0.9545)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.4ms
+Speed: 1.5ms preprocess, 22.4ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 3 ===
+Detected instances: 6
+Instance 0: Confidence=0.9449
+Instance 1: Confidence=0.9317
+Instance 2: Confidence=0.9027
+Instance 3: Confidence=0.8698
+Instance 4: Confidence=0.7552
+Instance 5: Confidence=0.5370
+tmp min: tensor(0.) tmp max: tensor(1.)
+668 28 540 960
+There are 18 prompts
+current IoU is: 0.9493759274482727
+Seok, iteration idx= 3 IoU = tensor(0.9494)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 23.5ms
+Speed: 1.5ms preprocess, 23.5ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 4 ===
+Detected instances: 7
+Instance 0: Confidence=0.9425
+Instance 1: Confidence=0.9028
+Instance 2: Confidence=0.8830
+Instance 3: Confidence=0.8673
+Instance 4: Confidence=0.8513
+Instance 5: Confidence=0.6991
+Instance 6: Confidence=0.4623
+tmp min: tensor(0.) tmp max: tensor(1.)
+659 48 540 960
+There are 16 prompts
+current IoU is: 0.9442479610443115
+Seok, iteration idx= 4 IoU = tensor(0.9442)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 22.9ms
+Speed: 1.3ms preprocess, 22.9ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 5 ===
+Detected instances: 7
+Instance 0: Confidence=0.9535
+Instance 1: Confidence=0.9077
+Instance 2: Confidence=0.8941
+Instance 3: Confidence=0.7788
+Instance 4: Confidence=0.7653
+Instance 5: Confidence=0.6566
+Instance 6: Confidence=0.4216
+tmp min: tensor(0.) tmp max: tensor(1.)
+687 52 540 960
+There are 17 prompts
+current IoU is: 0.9412007331848145
+Seok, iteration idx= 5 IoU = tensor(0.9412)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.4ms
+Speed: 1.2ms preprocess, 23.4ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 6 ===
+Detected instances: 6
+Instance 0: Confidence=0.9505
+Instance 1: Confidence=0.9323
+Instance 2: Confidence=0.8850
+Instance 3: Confidence=0.8476
+Instance 4: Confidence=0.6034
+Instance 5: Confidence=0.3047
+tmp min: tensor(0.) tmp max: tensor(1.)
+663 64 540 960
+There are 17 prompts
+current IoU is: 0.9247658252716064
+Seok, iteration idx= 6 IoU = tensor(0.9248)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.8ms
+Speed: 1.4ms preprocess, 22.8ms inference, 1.8ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 7 ===
+Detected instances: 6
+Instance 0: Confidence=0.9357
+Instance 1: Confidence=0.9320
+Instance 2: Confidence=0.8987
+Instance 3: Confidence=0.8981
+Instance 4: Confidence=0.8441
+Instance 5: Confidence=0.7465
+tmp min: tensor(0.) tmp max: tensor(1.)
+635 92 540 960
+There are 19 prompts
+current IoU is: 0.912767231464386
+Seok, iteration idx= 7 IoU = tensor(0.9128)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.1ms
+Speed: 1.7ms preprocess, 23.1ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 8 ===
+Detected instances: 6
+Instance 0: Confidence=0.9338
+Instance 1: Confidence=0.9123
+Instance 2: Confidence=0.8407
+Instance 3: Confidence=0.4946
+Instance 4: Confidence=0.4087
+Instance 5: Confidence=0.3586
+tmp min: tensor(0.) tmp max: tensor(1.)
+620 32 540 960
+There are 14 prompts
+current IoU is: 0.9137646555900574
+Seok, iteration idx= 8 IoU = tensor(0.9138)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 24.1ms
+Speed: 1.2ms preprocess, 24.1ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 9 ===
+Detected instances: 5
+Instance 0: Confidence=0.9435
+Instance 1: Confidence=0.9302
+Instance 2: Confidence=0.8207
+Instance 3: Confidence=0.7721
+Instance 4: Confidence=0.7155
+tmp min: tensor(0.) tmp max: tensor(1.)
+551 40 540 960
+There are 13 prompts
+current IoU is: 0.94326251745224
+Seok, iteration idx= 9 IoU = tensor(0.9433)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.3ms
+Speed: 1.3ms preprocess, 22.3ms inference, 1.3ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 10 ===
+Detected instances: 5
+Instance 0: Confidence=0.9373
+Instance 1: Confidence=0.9227
+Instance 2: Confidence=0.8916
+Instance 3: Confidence=0.8082
+Instance 4: Confidence=0.3235
+tmp min: tensor(0.) tmp max: tensor(1.)
+542 76 540 960
+There are 14 prompts
+current IoU is: 0.9522330164909363
+Seok, iteration idx= 10 IoU = tensor(0.9522)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 23.2ms
+Speed: 1.4ms preprocess, 23.2ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 11 ===
+Detected instances: 7
+Instance 0: Confidence=0.9313
+Instance 1: Confidence=0.8929
+Instance 2: Confidence=0.8629
+Instance 3: Confidence=0.8365
+Instance 4: Confidence=0.7943
+Instance 5: Confidence=0.7689
+Instance 6: Confidence=0.3691
+tmp min: tensor(0.) tmp max: tensor(1.)
+500 36 540 960
+There are 16 prompts
+current IoU is: 0.9202306270599365
+Seok, iteration idx= 11 IoU = tensor(0.9202)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 24.3ms
+Speed: 1.3ms preprocess, 24.3ms inference, 1.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 12 ===
+Detected instances: 5
+Instance 0: Confidence=0.9403
+Instance 1: Confidence=0.9039
+Instance 2: Confidence=0.8857
+Instance 3: Confidence=0.8587
+Instance 4: Confidence=0.7733
+tmp min: tensor(0.) tmp max: tensor(1.)
+433 36 540 960
+There are 13 prompts
+current IoU is: 0.927162766456604
+Seok, iteration idx= 12 IoU = tensor(0.9272)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 22.4ms
+Speed: 1.2ms preprocess, 22.4ms inference, 1.4ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 13 ===
+Detected instances: 8
+Instance 0: Confidence=0.9461
+Instance 1: Confidence=0.9275
+Instance 2: Confidence=0.9187
+Instance 3: Confidence=0.7332
+Instance 4: Confidence=0.5451
+Instance 5: Confidence=0.3224
+Instance 6: Confidence=0.3072
+Instance 7: Confidence=0.2709
+tmp min: tensor(0.) tmp max: tensor(1.)
+385 12 540 960
+There are 12 prompts
+current IoU is: 0.9549310803413391
+Seok, iteration idx= 13 IoU = tensor(0.9549)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.9ms
+Speed: 1.4ms preprocess, 23.9ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 14 ===
+Detected instances: 6
+Instance 0: Confidence=0.9510
+Instance 1: Confidence=0.9400
+Instance 2: Confidence=0.8922
+Instance 3: Confidence=0.7839
+Instance 4: Confidence=0.7346
+Instance 5: Confidence=0.6675
+tmp min: tensor(0.) tmp max: tensor(1.)
+323 20 540 960
+There are 15 prompts
+current IoU is: 0.9479740262031555
+Seok, iteration idx= 14 IoU = tensor(0.9480)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.6ms
+Speed: 1.3ms preprocess, 22.6ms inference, 1.9ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 15 ===
+Detected instances: 5
+Instance 0: Confidence=0.9489
+Instance 1: Confidence=0.9128
+Instance 2: Confidence=0.8616
+Instance 3: Confidence=0.7378
+Instance 4: Confidence=0.4551
+tmp min: tensor(0.) tmp max: tensor(1.)
+308 12 540 960
+There are 15 prompts
+current IoU is: 0.9649619460105896
+Seok, iteration idx= 15 IoU = tensor(0.9650)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 21.9ms
+Speed: 1.4ms preprocess, 21.9ms inference, 2.1ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 16 ===
+Detected instances: 5
+Instance 0: Confidence=0.9553
+Instance 1: Confidence=0.9348
+Instance 2: Confidence=0.8795
+Instance 3: Confidence=0.5983
+Instance 4: Confidence=0.4742
+tmp min: tensor(0.) tmp max: tensor(1.)
+296 0 540 960
+There are 13 prompts
+current IoU is: 0.9603570103645325
+Seok, iteration idx= 16 IoU = tensor(0.9604)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 22.9ms
+Speed: 1.5ms preprocess, 22.9ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 17 ===
+Detected instances: 8
+Instance 0: Confidence=0.9589
+Instance 1: Confidence=0.9509
+Instance 2: Confidence=0.8897
+Instance 3: Confidence=0.8221
+Instance 4: Confidence=0.7976
+Instance 5: Confidence=0.7491
+Instance 6: Confidence=0.3801
+Instance 7: Confidence=0.2839
+tmp min: tensor(0.) tmp max: tensor(1.)
+270 44 540 960
+There are 15 prompts
+current IoU is: 0.9570651650428772
+Seok, iteration idx= 17 IoU = tensor(0.9571)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.8ms
+Speed: 1.3ms preprocess, 23.8ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 18 ===
+Detected instances: 6
+Instance 0: Confidence=0.9545
+Instance 1: Confidence=0.9200
+Instance 2: Confidence=0.8959
+Instance 3: Confidence=0.8240
+Instance 4: Confidence=0.8171
+Instance 5: Confidence=0.3278
+tmp min: tensor(0.) tmp max: tensor(1.)
+257 16 540 960
+There are 17 prompts
+current IoU is: 0.9634599685668945
+Seok, iteration idx= 18 IoU = tensor(0.9635)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 23.8ms
+Speed: 1.3ms preprocess, 23.8ms inference, 1.4ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 19 ===
+Detected instances: 5
+Instance 0: Confidence=0.9534
+Instance 1: Confidence=0.9170
+Instance 2: Confidence=0.9081
+Instance 3: Confidence=0.7840
+Instance 4: Confidence=0.7586
+tmp min: tensor(0.) tmp max: tensor(1.)
+262 36 540 960
+There are 17 prompts
+current IoU is: 0.9505994319915771
+Seok, iteration idx= 19 IoU = tensor(0.9506)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.4ms
+Speed: 2.5ms preprocess, 23.4ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 20 ===
+Detected instances: 6
+Instance 0: Confidence=0.9436
+Instance 1: Confidence=0.9128
+Instance 2: Confidence=0.9021
+Instance 3: Confidence=0.7538
+Instance 4: Confidence=0.6958
+Instance 5: Confidence=0.4477
+tmp min: tensor(0.) tmp max: tensor(1.)
+266 120 540 960
+There are 17 prompts
+current IoU is: 0.9386951923370361
+Seok, iteration idx= 20 IoU = tensor(0.9387)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 23.1ms
+Speed: 3.2ms preprocess, 23.1ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 21 ===
+Detected instances: 5
+Instance 0: Confidence=0.9358
+Instance 1: Confidence=0.9349
+Instance 2: Confidence=0.8948
+Instance 3: Confidence=0.8225
+Instance 4: Confidence=0.7823
+tmp min: tensor(0.) tmp max: tensor(1.)
+269 92 540 960
+There are 17 prompts
+current IoU is: 0.9289973378181458
+Seok, iteration idx= 21 IoU = tensor(0.9290)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.4ms
+Speed: 2.7ms preprocess, 22.4ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 22 ===
+Detected instances: 6
+Instance 0: Confidence=0.9343
+Instance 1: Confidence=0.9156
+Instance 2: Confidence=0.8866
+Instance 3: Confidence=0.8747
+Instance 4: Confidence=0.7347
+Instance 5: Confidence=0.5717
+tmp min: tensor(0.) tmp max: tensor(1.)
+264 100 540 960
+There are 17 prompts
+current IoU is: 0.9226528406143188
+Seok, iteration idx= 22 IoU = tensor(0.9227)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 7 persons, 23.1ms
+Speed: 2.8ms preprocess, 23.1ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 23 ===
+Detected instances: 7
+Instance 0: Confidence=0.9486
+Instance 1: Confidence=0.9327
+Instance 2: Confidence=0.8889
+Instance 3: Confidence=0.8410
+Instance 4: Confidence=0.7670
+Instance 5: Confidence=0.3930
+Instance 6: Confidence=0.3173
+tmp min: tensor(0.) tmp max: tensor(1.)
+271 68 540 960
+There are 14 prompts
+current IoU is: 0.8919969201087952
+Seok, iteration idx= 23 IoU = tensor(0.8920)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 23.1ms
+Speed: 3.9ms preprocess, 23.1ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 24 ===
+Detected instances: 6
+Instance 0: Confidence=0.9387
+Instance 1: Confidence=0.9300
+Instance 2: Confidence=0.9169
+Instance 3: Confidence=0.6203
+Instance 4: Confidence=0.5186
+Instance 5: Confidence=0.2775
+tmp min: tensor(0.) tmp max: tensor(1.)
+294 52 540 960
+There are 12 prompts
+current IoU is: 0.3624110817909241
+Seok, iteration idx= 24 IoU = tensor(0.3624)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 23.5ms
+Speed: 2.8ms preprocess, 23.5ms inference, 1.8ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 25 ===
+Detected instances: 8
+Instance 0: Confidence=0.9445
+Instance 1: Confidence=0.9200
+Instance 2: Confidence=0.9052
+Instance 3: Confidence=0.5757
+Instance 4: Confidence=0.3700
+Instance 5: Confidence=0.3422
+Instance 6: Confidence=0.3060
+Instance 7: Confidence=0.2816
+tmp min: tensor(0.) tmp max: tensor(1.)
+293 56 540 960
+There are 11 prompts
+current IoU is: 0.443895548582077
+Seok, iteration idx= 25 IoU = tensor(0.4439)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 22.5ms
+Speed: 3.8ms preprocess, 22.5ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 26 ===
+Detected instances: 5
+Instance 0: Confidence=0.9583
+Instance 1: Confidence=0.9051
+Instance 2: Confidence=0.9033
+Instance 3: Confidence=0.8099
+Instance 4: Confidence=0.2907
+tmp min: tensor(0.) tmp max: tensor(1.)
+325 20 540 960
+There are 15 prompts
+current IoU is: 0.039916086941957474
+Seok, iteration idx= 26 IoU = tensor(0.0399)
+SKIP, unacceptable sam prediction, IoU is tensor(0.0399)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 24.0ms
+Speed: 3.2ms preprocess, 24.0ms inference, 1.5ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 27 ===
+Detected instances: 6
+Instance 0: Confidence=0.9487
+Instance 1: Confidence=0.9292
+Instance 2: Confidence=0.8816
+Instance 3: Confidence=0.8691
+Instance 4: Confidence=0.7868
+Instance 5: Confidence=0.2647
+tmp min: tensor(0.) tmp max: tensor(1.)
+354 84 540 960
+There are 17 prompts
+current IoU is: 0.8273136019706726
+Seok, iteration idx= 27 IoU = tensor(0.8273)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 9 persons, 24.5ms
+Speed: 2.3ms preprocess, 24.5ms inference, 1.2ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 28 ===
+Detected instances: 9
+Instance 0: Confidence=0.9370
+Instance 1: Confidence=0.9310
+Instance 2: Confidence=0.9182
+Instance 3: Confidence=0.7854
+Instance 4: Confidence=0.6226
+Instance 5: Confidence=0.5370
+Instance 6: Confidence=0.5030
+Instance 7: Confidence=0.4030
+Instance 8: Confidence=0.3007
+tmp min: tensor(0.) tmp max: tensor(1.)
+370 61 540 960
+There are 17 prompts
+current IoU is: 0.8685420155525208
+Seok, iteration idx= 28 IoU = tensor(0.8685)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 6 persons, 22.6ms
+Speed: 2.5ms preprocess, 22.6ms inference, 1.9ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 29 ===
+Detected instances: 6
+Instance 0: Confidence=0.9428
+Instance 1: Confidence=0.9198
+Instance 2: Confidence=0.8951
+Instance 3: Confidence=0.8149
+Instance 4: Confidence=0.7098
+Instance 5: Confidence=0.4333
+tmp min: tensor(0.) tmp max: tensor(1.)
+381 80 540 960
+There are 15 prompts
+current IoU is: 0.31439128518104553
+Seok, iteration idx= 29 IoU = tensor(0.3144)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 8 persons, 23.4ms
+Speed: 3.2ms preprocess, 23.4ms inference, 1.6ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 30 ===
+Detected instances: 8
+Instance 0: Confidence=0.9484
+Instance 1: Confidence=0.9271
+Instance 2: Confidence=0.9025
+Instance 3: Confidence=0.7065
+Instance 4: Confidence=0.5530
+Instance 5: Confidence=0.4350
+Instance 6: Confidence=0.2934
+Instance 7: Confidence=0.2923
+tmp min: tensor(0.) tmp max: tensor(1.)
+407 56 540 960
+There are 17 prompts
+current IoU is: 0.001312335953116417
+Seok, iteration idx= 30 IoU = tensor(0.0013)
+SKIP, unacceptable sam prediction, IoU is tensor(0.0013)
+
+WARNING ⚠️ imgsz=[540, 960] must be multiple of max stride 32, updating to [544, 960]
+0: 544x960 5 persons, 23.5ms
+Speed: 3.0ms preprocess, 23.5ms inference, 1.7ms postprocess per image at shape (1, 3, 544, 960)
+
+=== View 31 ===
+Detected instances: 5
+Instance 0: Confidence=0.9401
+Instance 1: Confidence=0.9317
+Instance 2: Confidence=0.9104
+Instance 3: Confidence=0.7368
+Instance 4: Confidence=0.3522
+tmp min: tensor(0.) tmp max: tensor(1.)
+435 132 540 960
+There are 11 prompts
+current IoU is: 0.36203089356422424
+Seok, iteration idx= 31 IoU = tensor(0.3620)
+scene_rep_reconstruction (coarse): saved checkpoints at ./logs/nerf_unbounded/dcvgo_Set10_unbounded/coarse_segmentation_gui.tar
+All results are dumped into ./logs/nerf_unbounded/dcvgo_Set10_unbounded/render_train_coarse_segmentation_gui
+Render seg_img...:   0%|                                 | 0/32 [00:00<?, ?it/s]Testing, rgb shape:  (540, 960, 3)
+Render seg_img...: 100%|████████████████████████| 32/32 [00:40<00:00,  1.27s/it]
+Testing psnr 27.642518877983093 (avg)
+All results are dumped into ./logs/nerf_unbounded/dcvgo_Set10_unbounded/render_train_coarse_segmentation_gui
+Render seg_density...:   0%|                             | 0/32 [00:00<?, ?it/s]Testing, rgb shape:  (540, 960, 3)
+Render seg_density...: 100%|████████████████████| 32/32 [00:28<00:00,  1.14it/s]
+Testing psnr 3.3391696214675903 (avg)
+train: coarse segmentation in 00:05:47
+train: finish (eps time 00:05:48 )
+[96mRendering with ckpt ./logs/nerf_unbounded/dcvgo_Set10_unbounded/coarse_segmentation_gui.tar[0m
+^C
+Traceback (most recent call last):
+  File "/home/lab/SA3D_YOLO/run_seg_gui.py", line 119, in <module>
+    model, optimizer, start = utils.load_existed_model(args, cfg, cfg.fine_train, ckpt_path, device)
+  File "/home/lab/SA3D_YOLO/lib/utils.py", line 75, in load_existed_model
+    model = load_model(model_class, reload_ckpt_path).to(device)
+  File "/home/lab/SA3D_YOLO/lib/utils.py", line 205, in load_model
+    ckpt = torch.load(ckpt_path)
+  File "/home/lab/anaconda3/envs/sa3d_yolo/lib/python3.10/site-packages/ultralytics/utils/patches.py", line 86, in torch_load
+    return _torch_load(*args, **kwargs)
+  File "/home/lab/anaconda3/envs/sa3d_yolo/lib/python3.10/site-packages/torch/serialization.py", line 712, in load
+    return _load(opened_zipfile, map_location, pickle_module, **pickle_load_args)
+  File "/home/lab/anaconda3/envs/sa3d_yolo/lib/python3.10/site-packages/torch/serialization.py", line 1049, in _load
+    result = unpickler.load()
+  File "/home/lab/anaconda3/envs/sa3d_yolo/lib/python3.10/site-packages/torch/serialization.py", line 1019, in persistent_load
+    load_tensor(dtype, nbytes, key, _maybe_decode_ascii(location))
+  File "/home/lab/anaconda3/envs/sa3d_yolo/lib/python3.10/site-packages/torch/serialization.py", line 997, in load_tensor
+    storage = zip_file.get_storage_from_record(name, numel, torch._UntypedStorage).storage()._untyped()
+KeyboardInterrupt
