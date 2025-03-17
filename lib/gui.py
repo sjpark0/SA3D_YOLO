@@ -438,24 +438,64 @@ class Sam3dGUI:
                 logging.debug("Starting training process")
                 # optim in the first view
 
-                # 1. 실제 뷰 ID 리스트
-                all_view_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+                all_view_indices = list(range(len(self.Seg3d.data_dict['i_train'])))
+                print("Available view indices:", all_view_indices)
+                print("Best view index:", best_view_idx)
 
-                print("valid_views:", all_view_ids)  # valid_views 리스트 출력
-                print("best_view_idx:", best_view_idx)  # best_view_idx 값 출력
+                # # 1. 실제 뷰 ID 리스트
+                # all_view_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
 
-                start_idx = best_view_idx
+                # print("valid_views:", all_view_ids)  # valid_views 리스트 출력
+                # print("best_view_idx:", best_view_idx)  # best_view_idx 값 출력
+
+                # 포즈 거리 기반 정렬 적용
+                sorted_indices = [best_view_idx]
+                available_indices = list(range(len(all_view_indices)))
+                available_indices.remove(best_view_idx)
+
+                # 히스토리 윈도우 초기화
+                history_window = deque(maxlen=4)
+                history_window.append(best_view_idx)
+
+                # 포즈 거리 기반 정렬
+                poses = self.Seg3d.data_dict['poses'][self.Seg3d.data_dict['i_train']]
+
+                while available_indices:
+                    # 가중치 계산
+                    weighted_distances = {}
+                    for candidate in available_indices:
+                        total = 0.0
+                        weight_sum = 0.0
+                        for k, prev_idx in enumerate(reversed(history_window)):
+                            weight = 0.5 ** (k+1)
+                            distance = compute_pose_distance(poses[prev_idx], poses[candidate])
+                            total += weight * distance
+                            weight_sum += weight
+                        weighted_distances[candidate] = total / weight_sum  # 정규화
+                    # 최소 가중 거리 선택
+                    next_idx = min(weighted_distances.items(), key=lambda x: x[1])[0]
+                    # 히스토리 업데이트
+                    sorted_indices.append(next_idx)
+                    available_indices.remove(next_idx)
+                    history_window.append(next_idx)
+
+                # 첫 번째 학습을 위한 정렬된 인덱스 저장
+                i_train_sorted_1 = sorted_indices.copy()
+                self.Seg3d.data_dict['i_train'] = i_train_sorted_1
+
+                # start_idx = best_view_idx
                 
-                # 3. best_view_idx부터 끝까지 순차적으로 진행
-                view_order = all_view_ids[start_idx:] + all_view_ids[:start_idx]
+                # # 3. best_view_idx부터 끝까지 순차적으로 진행
+                # view_order = all_view_ids[start_idx:] + all_view_ids[:start_idx]
 
-                print("view_order:", view_order)  # best_view_idx 값 출력
+                # print("view_order:", view_order)  # best_view_idx 값 출력
 
-                view_id_to_index = {view_id: index for index, view_id in enumerate(all_view_ids)}
-                index_to_view_id = {index: view_id for index, view_id in enumerate(all_view_ids)}
-                i_train_sorted_1 = [view_id_to_index[view_id] for view_id in view_order]
+                # view_id_to_index = {view_id: index for index, view_id in enumerate(all_view_ids)}
+                # index_to_view_id = {index: view_id for index, view_id in enumerate(all_view_ids)}
+                
+                # i_train_sorted_1 = [view_id_to_index[view_id] for view_id in view_order]
 
-                self.Seg3d.data_dict['i_train'] = i_train_sorted_1  # 학습 순서 갱신
+                # self.Seg3d.data_dict['i_train'] = i_train_sorted_1  # 학습 순서 갱신
 
                 # render_poses, HW, Ks 갱신
                 self.Seg3d.update_render_poses()
@@ -479,32 +519,23 @@ class Sam3dGUI:
                 # 학습순서선정/학습수행 플래그 설정
                 self.Seg3d.vsgflag = True  # 할당 연산자
 
+                # 첫 번째 학습에서 사용한 인덱스 저장
+                first_train_indices = i_train_sorted_1.copy()
                 
                 # by seok: sort view list according to the confidence value
                 confidences = self.Seg3d.confidences
-
-                i_train_sorted_1_to_view_id = [index_to_view_id[i] for i in i_train_sorted_1]
-
                 max_conf_idx = confidences.index(max(confidences))
                 sorted_indices = [max_conf_idx]
                 available_indices = list(range(len(confidences)))
                 available_indices.remove(max_conf_idx)
+
                 history_window = deque(maxlen=4)  # 최근 4개 뷰 추적
                 history_window.append(max_conf_idx)
 
                 # by young : sort view list according to the pose distances
                 # 포즈 거리 기반으로 정렬된 순서에 따라 학습 진행
                 poses = self.Seg3d.data_dict['poses'][self.Seg3d.data_dict['i_train']]
-                # available_indices = set(range(len(poses))) - {max_conf_idx}
 
-                # 이전 시점과 가장 가까운 시점을 순차적으로 선택
-                # while available_indices:
-                #     current_pose = poses[sorted_indices[-1]]
-                #     distances = {idx: compute_pose_distance(current_pose, poses[idx]) 
-                #                 for idx in available_indices}
-                #     next_idx = min(distances.items(), key=lambda x: x[1])[0]
-                #     sorted_indices.append(next_idx)
-                #     available_indices.remove(next_idx)
                 while available_indices:
                     # 가중치 계산
                     weighted_distances = {}
@@ -524,32 +555,27 @@ class Sam3dGUI:
                     available_indices.remove(next_idx)
                     history_window.append(next_idx)
 
-                # 정렬된 인덱스를 뷰 ID로 변환
-                sorted_view_ids = [i_train_sorted_1_to_view_id[i] for i in sorted_indices]
-                # sorted_view_ids = sorted(
-                #     all_view_ids,
-                #     key=lambda x: self.Seg3d.confidences[view_id_to_index[x]],
-                #     reverse=True
-                # )
-                i_train_sorted = [view_id_to_index[view_id] for view_id in sorted_view_ids]
+                # 두 번째 학습을 위한 정렬된 인덱스
+                i_train_sorted_2 = sorted_indices
 
-                self.Seg3d.data_dict['i_train'] = i_train_sorted  # 학습 순서 갱신
+                # 직접 인덱스 사용 (매핑 없이)
+                self.Seg3d.data_dict['i_train'] = i_train_sorted_2
+
                 print(f"Selected Instance Confidence List: {self.Seg3d.confidences}")
                 print(f"Sorted Confidence Order: {[self.Seg3d.confidences[i] for i in sorted_indices]}")
-                print(f"sorted_indices: {sorted_indices}")
-                print(f"Initial view (highest confidence): {index_to_view_id[max_conf_idx]}")
-                print(f"New training order: {sorted_view_ids}")
+                print(f"Initial view (highest confidence): {max_conf_idx}")
+                print(f"New training order: {sorted_indices}")
                 
                 # render_poses, HW, Ks 갱신
                 self.Seg3d.update_render_poses()
 
-                img = self.Seg3d.data_dict['images'][i_train_sorted[0], :, :, :].numpy()
+                img = self.Seg3d.data_dict['images'][i_train_sorted_2[0], :, :, :].numpy()
                 img = utils.to8b(img)
                 h, w, c = img.shape
                 results = model_yolo.predict(source=img, imgsz=(h, w), classes=0)
                 h2, w2 = results[0].masks.data[0].shape
                 m = torch.zeros([h, w])
-                idx_select = self.Seg3d.idx_selected[i_train_sorted[0]]
+                idx_select = self.Seg3d.idx_selected[i_train_sorted_2[0]]
                 mask_img = results[0].masks.data[idx_select]
                 m = mask_img[(h2 - h) // 2 : (h2 + h) // 2, :]
 
