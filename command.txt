@@ -1,5 +1,6 @@
 python run.py --config=configs/nerf_unbounded/Set1.py --stop_at=20000 --render_video --i_weights=10000
 
 python run_seg_gui.py --config=configs/nerf_unbounded/seg_Set1.py --segment --sp_name=_gui --num_prompts=20 --render_opt=train --save_ckpt
+python run_seg_gui.py --config=configs/nerf_unbounded/seg_Set1.py --segment --sp_name=_gui --num_prompts=20 --render_only --render_opt=train --save_ckpt --dump_images --seg_type seg_img seg_density
 
 python run_seg_gui.py --config=configs/nerf_unbounded/seg_Set1.py --segment --sp_name=_gui --num_prompts=20 --render_only --render_opt=video --dump_images --seg_type seg_img seg_density

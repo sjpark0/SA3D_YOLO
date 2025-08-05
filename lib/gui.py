@@ -75,24 +75,24 @@ def find_view_with_max_objects(data_dict, yolo_model):
         best_view_idx: 가장 많은 객체가 감지된 뷰의 인덱스
         max_instances: 해당 뷰에서 감지된 총 객체 수
     """
-    # max_instances = 0
-    # best_view_idx = 0
+    #max_instances = 0
+    #best_view_idx = 0
 
-    # for idx in range(len(data_dict['i_train'])):
-    #     img = data_dict['images'][idx, :, :, :].numpy()
-    #     img = utils.to8b(img)
-    #     h, w, c = img.shape
+    #for idx in range(len(data_dict['i_train'])):
+    #    img = data_dict['images'][idx, :, :, :].numpy()
+    #    img = utils.to8b(img)
+    #    h, w, c = img.shape
 
-    #     # YOLO로 객체 감지
-    #     results = yolo_model.predict(source=img, imgsz=(h, w))
-    #     num_instances = len(results[0].boxes)  # 감지된 객체 수
+        # YOLO로 객체 감지
+    #    results = yolo_model.predict(source=img, imgsz=(h, w))
+    #    num_instances = len(results[0].boxes)  # 감지된 객체 수
 
-    #     if num_instances > max_instances:
-    #         max_instances = num_instances
-    #         best_view_idx = idx
+    #    if num_instances > max_instances:
+    #        max_instances = num_instances
+    #        best_view_idx = idx
 
-    # return best_view_idx, max_instances
-
+    #return best_view_idx, max_instances
+    
     max_score = -float('inf')
     best_view_idx = 0
 
@@ -126,8 +126,7 @@ def find_view_with_max_objects(data_dict, yolo_model):
             best_view_idx = idx
 
     return best_view_idx, max_score
-
-
+    
 class Sam3dGUI:
     def __init__(self, Seg3d, debug=False):
         ctx = {
@@ -148,7 +147,7 @@ class Sam3dGUI:
     def run(self):
         global best_view_idx  # 전역 변수 사용
         init_rgb = self.Seg3d.init_model()
-
+        
         # 모든 객체가 잘 보이는 뷰를 선택
         best_view_idx, max_instances = find_view_with_max_objects(self.Seg3d.data_dict, model_yolo)
 
@@ -157,7 +156,7 @@ class Sam3dGUI:
         # 선택된 뷰에서 초기 이미지 설정
         init_rgb = self.Seg3d.data_dict['images'][best_view_idx, :, :, :].numpy()
         init_rgb = utils.to8b(init_rgb)
-
+        
         self.ctx['cur_img'] = init_rgb
         self.run_app(sam_pred=self.Seg3d.predictor, ctx=self.ctx, init_rgb=init_rgb)
 
@@ -641,11 +640,11 @@ class Sam3dGUI:
                 fig_seged_rgb = draw_figure(seged_rgb, 'Seged RGB', animation_frame=0)
 
                 return html.Div("Train Stage Finished! Press Ctrl+C to Exit!"), fig_masked_rgb, fig_seged_rgb
-            
         
         #app.run_server(debug=self.debug)
-        app.run_server(debug=False, dev_tools_ui=False, dev_tools_props_check=False)
-
+        #app.run_server(debug=False, dev_tools_ui=False, dev_tools_props_check=False)
+        app.run(debug=False, dev_tools_ui=False, dev_tools_props_check=False, host='0.0.0.0')
+    
 if __name__ == '__main__':
     from segment_anything import (SamAutomaticMaskGenerator, SamPredictor,
                               sam_model_registry)

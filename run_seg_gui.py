@@ -97,7 +97,6 @@ if __name__=='__main__':
 
     # load images / poses / camera settings / data split
     data_dict = utils.load_everything(args=args, cfg=cfg)
-
     # train
     if not args.render_only:
         train_seg(args, cfg, data_dict)
