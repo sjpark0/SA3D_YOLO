@@ -156,6 +156,7 @@ class Sam3dGUI:
         # 선택된 뷰에서 초기 이미지 설정
         init_rgb = self.Seg3d.data_dict['images'][best_view_idx, :, :, :].numpy()
         init_rgb = utils.to8b(init_rgb)
+        self.Seg3d.predictor.set_image(init_rgb)
         
         self.ctx['cur_img'] = init_rgb
         self.run_app(sam_pred=self.Seg3d.predictor, ctx=self.ctx, init_rgb=init_rgb)
