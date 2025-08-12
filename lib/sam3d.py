@@ -468,8 +468,8 @@ class Sam3D(ABC):
                 print(f"current IoU is: {tmp_IoU}")
 
                 # by seok save yolo, rendered mask
-                # imageio.imwrite(f"tmp_rendered_mask_{idx}.png", tmp_rendered_mask.cpu())
-                # imageio.imwrite(f"mask_selected_{idx}.png", torch.as_tensor(masks[selected]).float().cpu())
+                #imageio.imwrite(f"tmp_rendered_mask_{idx}.png", ((tmp_rendered_mask.cpu().numpy()) *255).astype(np.uint8))
+                #imageio.imwrite(f"mask_selected_{idx}.png", (torch.as_tensor(masks[selected]).float().cpu().numpy() * 255).astype(np.uint8))
 
                 # by seok change threshold from 0.5 to 0.01 to solve region not growing
                 print("Seok, iteration idx=", idx, "IoU =", tmp_IoU)
